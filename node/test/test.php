@@ -1,5 +1,7 @@
 <?php 
-
+/**
+ * Set's user's as online
+ * */
 $data = array(
     "jid" => "visitor4@xmpp.livehelperchat.com", 
     "pass" => "visitor4",

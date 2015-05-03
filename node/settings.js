@@ -16,6 +16,13 @@ settings.listen_address = 'localhost';
 settings.listen_port = 4567;
 
 /**
+ * Path to ejabberdctl
+ * */
+settings.ejabberdctl = '/opt/ejabberd-15.04/bin/ejabberdctl'
+
+//************************** CHAT SETTINGS
+
+/**
  * How long online visitor should be considered as online. Miliseconds
  * */
 settings.online_timeout = 5000;
