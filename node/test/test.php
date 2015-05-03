@@ -5,7 +5,8 @@
 $data = array(
     "jid" => "visitor4@xmpp.livehelperchat.com", 
     "pass" => "visitor4",
-    "host" => "localhost",
+    "host" => "localhost",    
+    "nick" => "Visitor 4 nick",
     "domain" => false
 );
 
@@ -28,7 +29,8 @@ $data = array(
     "jid" => "visitor1@xmpp.livehelperchat.com",
     "pass" => "visitor1",
     "host" => "localhost",
-    "domain" => "test1"
+    "domain" => "test1",
+    "nick" => "Visitor 1 nick",
 
 );
 

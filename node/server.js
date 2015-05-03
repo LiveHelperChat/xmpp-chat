@@ -50,6 +50,7 @@ app.post('/xmpp', jsonParser, function (req, res) {
 			  'client_id':uniqid,
 			  'jid':req.body.jid,
 			  'pass':req.body.pass,
+			  'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),
 			  'host':req.body.host,
 			  'cb' : function(params){
 				  delete clients[params.client_id];

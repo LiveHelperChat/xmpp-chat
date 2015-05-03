@@ -9,11 +9,12 @@ var XMPPClient = function(params) {
 	this.disconnectTimeout = null;
 	this.removeCallback = params['cb'];
 	this.paramsClient = {'jid':params['jid'],'host':params['host'],'client_id':params['client_id']};
-
+	this.nick = (typeof params['nick'] !== 'undefined' ? params['nick'] : 'Online visitor');
+	
 	this.client = new Client({
 		jid: params['jid'],
 		password: params['pass'],
-		host: params['host'],
+		host: params['host'],		
 		reconnect: true
 	});
 	
@@ -70,9 +71,9 @@ XMPPClient.prototype.logout = function(){
 	this.isLogged = false;
 };
 
-//properties and methods
+// @todo format message content using some xml generators
 XMPPClient.prototype.onlineHandler = function() {
-	this.client.send("<presence><status>Online visitor</status></presence>");	
+	this.client.send("<presence><status>Online visitor"+"\n"+"Other information user\n"+"</status><nick xmlns='http://jabber.org/protocol/nick'>"+this.nick+"</nick></presence>");	
 	this.isLogged = true;
 };
 
