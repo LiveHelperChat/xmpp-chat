@@ -62,6 +62,67 @@ app.post('/xmpp', jsonParser, function (req, res) {
 })
 
 /**
+ * Register online visitor and addign him to visitors roaster and make online in single request
+ * */
+app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
+	if (!req.body) return res.sendStatus(400)	  
+	
+	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.password !== 'undefined')
+	{
+		child = exec(config.ejabberdctl + " register " + escapeShell(req.body.user) + " " + escapeShell(req.body.host) + " "+escapeShell(req.body.password), function (error, stdout, stderr) {
+			if (config.debug.output == true) {
+				console.log('stdout: ' + stdout);
+				console.log('stderr: ' + stderr);
+			}			
+			if (/*1==-1 && */error !== null) {
+				var response = {'error':true,'msg':stderr+stdout};
+				res.send(JSON.stringify(response));	
+				
+			} else {			
+				// Assign user to visitors roaster
+				child = exec(config.ejabberdctl + " srg_user_add " + escapeShell(req.body.user) + " " + escapeShell(req.body.host) + " " + escapeShell('visitors') + " " + escapeShell(req.body.host), function (error, stdout, stderr) {
+					if (config.debug.output == true) {
+						console.log('stdout: ' + stdout);
+						console.log('stderr: ' + stderr);
+					}
+					
+					if (error !== null) {
+						var response = {'error':true,'msg':stderr+stdout};
+					} else {						
+						var uniqid = md5(req.body.user+'@'+req.body.host+req.body.pass+req.body.hostlogin);
+						
+						console.log(req.body.user+'@'+req.body.host+req.body.pass+req.body.hostlogin);
+						
+						try {
+							clients[uniqid] = new xmppClient({
+							  'client_id':uniqid,
+							  'jid':req.body.user+'@'+req.body.host,
+							  'pass':req.body.password,
+							  'host':req.body.hostlogin,
+							  'cb' : function(params){
+								  delete clients[params.client_id];
+							}});
+
+							var response = {'error':false,'msg':stdout};							
+						} catch (err) {
+							var response = {'error':true,'msg':err.message};							
+						}						
+					}
+					
+					res.send(JSON.stringify(response));					
+				});
+			}
+			
+			
+		});  
+	} else {
+		var response = {'error':false,'msg':'Invalid arguments'};
+		res.send(JSON.stringify(response));
+	}
+})
+
+
+/**
  * Register account in XMPP server
  * */
 app.post('/xmpp-register', jsonParser, function (req, res) {
