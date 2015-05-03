@@ -45,7 +45,8 @@ app.post('/xmpp', jsonParser, function (req, res) {
 		  if (config.debug.output == true) {
 			  console.log("New client setup");
 		  }		  
-		  clients[uniqid] = new xmppClient({
+		  try {
+			  clients[uniqid] = new xmppClient({
 			  'client_id':uniqid,
 			  'jid':req.body.jid,
 			  'pass':req.body.pass,
@@ -53,6 +54,13 @@ app.post('/xmpp', jsonParser, function (req, res) {
 			  'cb' : function(params){
 				  delete clients[params.client_id];
 			  }});
+			  
+		  } catch (err) {
+			  if (config.debug.output == true) {
+				  console.log("Error during setting a state "+err.message);
+			  }							
+		  }
+		  
 	  } else {
 		  if (config.debug.output == true) {
 			  console.log("Session extend");
@@ -74,7 +82,7 @@ app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
 				console.log('stdout: ' + stdout);
 				console.log('stderr: ' + stderr);
 			}			
-			if (/*1==-1 && */error !== null) {
+			if (/*1==-1 && */error !== null) { // To test and avoid creating new users
 				var response = {'error':true,'msg':stderr+stdout};
 				res.send(JSON.stringify(response));	
 				
@@ -89,10 +97,8 @@ app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
 					if (error !== null) {
 						var response = {'error':true,'msg':stderr+stdout};
 					} else {						
-						var uniqid = md5(req.body.user+'@'+req.body.host+req.body.pass+req.body.hostlogin);
-						
-						console.log(req.body.user+'@'+req.body.host+req.body.pass+req.body.hostlogin);
-						
+						var uniqid = md5(req.body.user+'@'+req.body.host+req.body.password+req.body.hostlogin);
+												
 						try {
 							clients[uniqid] = new xmppClient({
 							  'client_id':uniqid,

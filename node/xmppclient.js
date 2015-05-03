@@ -16,13 +16,20 @@ var XMPPClient = function(params) {
 		host: params['host'],
 		reconnect: true
 	});
-
+	
 	this.client.on('online', function() {
 		if (config.debug.output == true) {
 			console.log('Client is online')
 		}
 		
 		_that.onlineHandler();	   
+	});
+
+	// @todo add some handler error, perhaps post some data to api
+	this.client.on('error', function(err) {
+		if (config.debug.output == true) {
+			console.log('Error here '+err);
+		}			   
 	});
 
 	this.client.on('offline', function () {
