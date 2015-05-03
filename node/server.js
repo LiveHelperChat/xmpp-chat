@@ -228,7 +228,7 @@ app.post('/xmpp-delete-user-from-roaster', jsonParser, function (req, res) {
 			}
 			
 			if (error !== null) {
-			    var response = {'error':true,'msg':stderr+stdout};
+				var response = {'error':true,'msg':stderr+stdout};
 			} else {
 				var response = {'error':false,'msg':stdout};
 			}
@@ -240,6 +240,15 @@ app.post('/xmpp-delete-user-from-roaster', jsonParser, function (req, res) {
 		res.send(JSON.stringify(response));
 	}
 })
+
+app.post('/xmpp-testing-json', jsonParser, function (req, res) {
+	if (!req.body) return res.sendStatus(400)	
+	res.send(JSON.stringify({'status':true}));
+	console.log(req.body);
+})
+
+
+
 
 app.use(errorHandler({
   dumpExceptions: true,
