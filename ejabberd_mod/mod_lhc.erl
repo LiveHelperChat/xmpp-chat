@@ -46,27 +46,44 @@ stop(Host) ->
 on_set(User, Server, _Resource, _Packet) ->
    LUser = jlib:nodeprep(User),
    LServer = jlib:nodeprep(Server),
-   %%_SID = ejabberd_sm:get_session_pid(LUser, LServer, Resource),  
+   %%_SID = ejabberd_sm:get_session_pid(LUser, LServer, Resource),
    
-   Method = post,
-   URL = "http://localhost:4567/xmpp-testing-json",
-   Header = [],
-   Type = "application/json",
-   Body = "{\"action\":\"connect\",\"user\":\""++erlang:binary_to_list(LUser)++"\",\"server\":\""++erlang:binary_to_list(LServer)++"\"}",   
-   HTTPOptions = [],
-   Options = [],
-   httpc:request(Method, {URL, Header, Type, Body}, HTTPOptions, Options),     
-   ?INFO_MSG("Presence set demo compile Request was send %p",[Body]).
+   %% Inform about new connection only if operator is connected
+   case re:run(erlang:binary_to_list(LUser),"^visitor\.[0-9](.*?)") of
+	  {match, _} ->  ok;
+	  nomatch -> 
+		   Method = post,
+		   URL = gen_mod:get_module_opt(LServer, ?MODULE, ping_address,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		   Header = [],
+		   Type = "application/json",
+		   Body = "{\"action\":\"connect\",\"user\":\""++erlang:binary_to_list(LUser)++"\",\"server\":\""++erlang:binary_to_list(LServer)++"\"}",   
+		   HTTPOptions = [],
+		   Options = [],
+		   httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
+   end.
+          
+   %%?INFO_MSG("Presence set demo compile Request was send %p",[Body]).
 
 on_unset(User, Server, _Resource, _Packet) ->
    LUser = jlib:nodeprep(User),
    LServer = jlib:nodeprep(Server),
-   Method = post,
-   URL = "http://localhost:4567/xmpp-testing-json",
-   Header = [],
-   Type = "application/json",
-   Body = "{\"action\":\"disconnect\",\"user\":\""++erlang:binary_to_list(LUser)++"\",\"server\":\""++erlang:binary_to_list(LServer)++"\"}",   
-   HTTPOptions = [],
-   Options = [],
-   httpc:request(Method, {URL, Header, Type, Body}, HTTPOptions, Options),   
-   ?INFO_MSG("Presence set demo un-set %p %p", [erlang:binary_to_list(LUser),erlang:binary_to_list(LServer)]). 	
+       
+   %% Inform about closed connection only if operator is disconnected
+   case re:run(erlang:binary_to_list(LUser),"^visitor\.[0-9](.*?)") of
+	  {match, _} ->  ok;
+   nomatch -> 
+	   Method = post, 
+	   URL = gen_mod:get_module_opt(LServer, ?MODULE, ping_address,
+	                                            fun iolist_to_binary/1,
+	                                            undefined),
+	   Header = [],
+	   Type = "application/json",
+	   Body = "{\"action\":\"disconnect\",\"user\":\""++erlang:binary_to_list(LUser)++"\",\"server\":\""++erlang:binary_to_list(LServer)++"\"}",   
+	   HTTPOptions = [],
+	   Options = [],
+	   httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
+   end.
+    
+   %%?INFO_MSG("Presence set demo un-set %p %p", [erlang:binary_to_list(LUser),erlang:binary_to_list(LServer)]).

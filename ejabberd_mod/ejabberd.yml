@@ -1,0 +1,8 @@
+## Configuration example for mod_lhcping.erl and mod_lhc
+mod_lhc: 
+    ping_address: "http://localhost:4567/xmpp-testing-json"
+mod_lhcping:
+    send_pings: true
+    ping_interval: 300
+    timeout_action: kill
+    ping_address: "http://localhost:4567/xmpp-testing-json"

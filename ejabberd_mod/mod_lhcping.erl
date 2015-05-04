@@ -69,6 +69,7 @@
          send_pings = ?DEFAULT_SEND_PINGS :: boolean(),
 	 ping_interval = ?DEFAULT_PING_INTERVAL :: non_neg_integer(),
 	 timeout_action = none :: none | kill,
+	 ping_address,
          timers = (?DICT):new() :: ?TDICT}).
 
 %%====================================================================
@@ -111,10 +112,14 @@ init([Host, Opts]) ->
     PingInterval = gen_mod:get_opt(ping_interval, Opts,
                                    fun(I) when is_integer(I), I>0 -> I end,
 				   ?DEFAULT_PING_INTERVAL),
+	
     TimeoutAction = gen_mod:get_opt(timeout_action, Opts,
                                     fun(none) -> none;
                                        (kill) -> kill
                                     end, none),
+    PingAddress = gen_mod:get_opt(ping_address, Opts,
+                                fun iolist_to_binary/1,
+                                undefined),
     IQDisc = gen_mod:get_opt(iqdisc, Opts, fun gen_iq_handler:check_type/1,
                              no_queue),
     mod_disco:register_feature(Host, ?NS_PING),
@@ -136,6 +141,7 @@ init([Host, Opts]) ->
      #state{host = Host, send_pings = SendPings,
 	    ping_interval = PingInterval,
 	    timeout_action = TimeoutAction,
+	    ping_address = PingAddress,
 	    timers = (?DICT):new()}}.
 
 terminate(_Reason, #state{host = Host}) ->
@@ -192,17 +198,15 @@ handle_info({timeout, _TRef, {ping, JID}}, State) ->
 		gen_server:cast(Pid, {iq_pong, JID, Response})
 	end,
 	
-	?INFO_MSG("Ping send handle info",[]),
-	Method = post,
-    URL = "http://localhost:4567/xmpp-testing-json",
+	%% @todo by jid determine instance address for automated hosting support		
+	Method = post,  
     Header = [],
     Type = "application/json",
     Body = "{\"action\":\"ping\",\"user\":\""++erlang:binary_to_list(jlib:jid_to_string(JID))++"\"}",   
     HTTPOptions = [],
     Options = [],
-    httpc:request(Method, {URL, Header, Type, Body}, HTTPOptions, Options),  
-	
-	
+    httpc:request(Method, {erlang:binary_to_list(State#state.ping_address), Header, Type, Body}, HTTPOptions, Options),  
+		
     From = jlib:make_jid(<<"">>, State#state.host, <<"">>),
     ejabberd_local:route_iq(From, JID, IQ, F),
     Timers = add_timer(JID, State#state.ping_interval,
@@ -225,15 +229,22 @@ iq_ping(_From, _To,
 		sub_el = [SubEl, ?ERR_FEATURE_NOT_IMPLEMENTED]}
     end.
 
-user_online(_SID, JID, _Info) ->
-    start_ping(JID#jid.lserver, JID),
-    ?INFO_MSG("Ping send",[]).
+%% Activate pinging only to operators
+user_online(_SID, JID, _Info) ->	
+	case re:run(jlib:jid_to_string(JID),"^visitor\.[0-9](.*?)") of
+	  {match, _} -> ok;
+	  nomatch -> start_ping(JID#jid.lserver, JID)
+	end.
 
 user_offline(_SID, JID, _Info) ->
     stop_ping(JID#jid.lserver, JID).
 
+%% Activate pinging only to operators
 user_send(JID, _From, _Packet) ->
-    start_ping(JID#jid.lserver, JID).
+	case re:run(jlib:jid_to_string(JID),"^visitor\.[0-9](.*?)") of
+	  {match, _} ->  ok;
+	  nomatch -> start_ping(JID#jid.lserver, JID)
+	end.
 
 %%====================================================================
 %% Internal functions
