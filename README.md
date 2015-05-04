@@ -12,15 +12,13 @@ This is repository for future full XMPP chat support. At the moment it's just pr
  
 ### Operator sends a message to online visitor (need ejabberd mod here)
  * Operator writes message to user using XMPP client.
- * Two options here. Either receive message in node server and execute callback back to LHC extension to store operatror message
- * OR
- * Intercept message at ejabberd lhc extension and there execute callback to lhc module. Perhaps there is better place. Like it's more direct approach.
+ * Intercept message at ejabberd lhc extension and there execute callback to lhc module.
  
 ### Visitor starts a chat
  * We execute API call to node api server, with logins from online visitor. If logins does not exists, we create an account for chat user.
  * Message to be send based on department setting. To any random logged operator using XMPP. First check that online visitor has assigned sender and message was send using XMPP.
  * Basically we need intelligence operator selection based on department and online operators in XMPP node.
- * We can track operators status in XMPP based on lhc ejabberd extension callbacks execution
+ * We can track operators status in XMPP based on lhc ejabberd extension callbacks execution [Implemented]
  
 ### Sends a message to operator from visitor (during the chat)
  * Connect as user and send message to assigned operator if it exists. It has to exists based on aboove requirement.
@@ -34,3 +32,6 @@ This is repository for future full XMPP chat support. At the moment it's just pr
 These two modules are responsible for that, they have http callbacks which should be executed to LHC, still work in progress
  * mod_lhc.erl
  * mod_lhcping.erl
+ 
+### Progress
+ * Ejabberd mod's for monitoring operators status are done
