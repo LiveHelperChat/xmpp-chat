@@ -2,7 +2,7 @@
 This is repository for future full XMPP chat support. At the moment it's just prototyping and playing around
 
 ## Requirements
- * https://www.ejabberd.im/ with mod_admin_extra enabled
+ * https://www.ejabberd.im/ with mod_admin_extra enabled 15.04v
  * https://nodejs.org/
  * https://livehelperchat.com/
  * Advanced linux skills. This stuff is not for amateurs!!!
