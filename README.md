@@ -9,6 +9,11 @@ This is repository for future full XMPP chat support. At the moment it's just pr
 
 ## Workflow which should be implemented over time
 
+### LHC extension requirements
+ * Option to create an XMPP users and assign operators to them. I do not want to map them directly to accounts and have tight integration. Perhaps it will be enough just to provide XMPP username in standalone enviroment and users themself will be created using ejabberd admin interface. Food for thoughts at the moment.
+ * It should cleanup expired users from ejabberd virtual hosts.
+ * Support for automated hosting... 
+
 ### Visitor comes to site (node server takes care of this API)
  * LHC extension checks does passed online user has assigned XMPP user
  * If user does not exists executes test-online-visitor-workfllow.php workflow
