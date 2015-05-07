@@ -1,8 +1,11 @@
-## Configuration example for mod_lhcping.erl and mod_lhc
-mod_lhc: 
-    ping_address: "http://localhost:4567/xmpp-testing-json"
-mod_lhcping:
+  mod_lhc: 
+    ## Used in standalone enviroment
+    message_address: "http://dev.coral.lt/~remigijusk/testpost.php"
+    login_address: "http://localhost:4567/xmpp-testing-json"
+    logout_address: "http://localhost:4567/xmpp-testing-json"
+  mod_lhcping:
     send_pings: true
-    ping_interval: 300
+    ping_interval: 6
     timeout_action: kill
+    ## Used in standalone enviroment
     ping_address: "http://localhost:4567/xmpp-testing-json"

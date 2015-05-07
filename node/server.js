@@ -247,6 +247,11 @@ app.post('/xmpp-testing-json', jsonParser, function (req, res) {
 	console.log(req.body);
 })
 
+app.post('/xmpp-testing-body', function (req, res) {	
+	res.send(JSON.stringify({'status':true}));
+	console.log(req);
+})
+
 
 
 
