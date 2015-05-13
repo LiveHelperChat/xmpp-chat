@@ -15,26 +15,27 @@ This is repository for future full XMPP chat support. At the moment it's just pr
  * Support for automated hosting... 
 
 ### Visitor comes to site (node server takes care of this API)
- * LHC extension checks does passed online user has assigned XMPP user
- * If user does not exists executes test-online-visitor-workfllow.php workflow
- * If user exists executes test.php workflow
+ * LHC extension checks does passed online user has assigned XMPP user. [Implemented]
+ * If user does not exists executes test-online-visitor-workfllow.php workflow [Implemented]
+ * If user exists executes test.php workflow [Implemented]
  * Once hard timeout is reached in nodeserver it executes REST callback to LHC extension informing that user session has timed out.
  * Then we can just delete user from shared roaster or from xmpp itself and update online visitor record. [Not decided yet what's the best way to do it]
  * Visitor status should be appeneded with online information. It should come from request to NodeJS server.
+ * Visitor status should be online for 5 minutes since last page view
  
 ### Operator sends a message to online visitor. [mod_lhc]
- * Operator writes message to user using XMPP client.
- * Intercept message at ejabberd lhc extension and there execute callback to lhc module.
- * Mod should send messages only if sender is an operator.
- * If we find active chat [based on assigned chat_id to online visitor] we append message to chat if not we write this as invitation to chat to online visitor.
+ * Operator writes message to user using XMPP client. [Implemented]
+ * Intercept message at ejabberd lhc extension and there execute callback to lhc module. [Implemented]
+ * Mod should send messages only if sender is an operator. [Implemented]
+ * If we find active chat [based on assigned chat_id to online visitor] we append message to chat if not we write this as invitation to chat to online visitor. [Implemented]
  
 ### Visitor starts a chat [node]
- * We execute API call to node api server, with logins from online visitor. If logins does not exists, we create an account for chat user.
+ * First we check does chat has assigned online visitor id and if online visitor has a xmpp account record under it. 
  * Message to be send based on department setting. To any random logged operator using XMPP. First check that online visitor has assigned sender and message was send using XMPP.
  * Basically we need intelligence operator selection based on department and online operators in XMPP node.
  * We can track operators status in XMPP based on lhc ejabberd extension callbacks execution [Implemented]
  
-### Sends a message to operator from visitor (during the chat)
+### Send a message to operator from visitor (during the chat)
  * Connect as user and send message to assigned operator if it exists. It has to exists based on above requirement.
  * Once we do this, we just send http request to nodejs api or directly from PHP and send a message to ejabberd. Basically we login as visitor and send message to assigned operator xmpp user.
  
