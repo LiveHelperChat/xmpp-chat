@@ -97,13 +97,8 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 				  delete clients[params.client_id];
 			  }});
 			  
-			  // Give some time to connect and send message
-			  // @todo remake
-			  setTimeout(function(){
-				  clients[uniqid].sendMessage(req.body.operator_username,req.body.message);
-				  console.log("Senbding message delayed");
-			  },3000);
-			 
+			  // Send a message
+			  clients[uniqid].sendMessage(req.body.operator_username,req.body.message);
 			  
 		  } catch (err) {
 			  if (config.debug.output == true) {
@@ -115,9 +110,7 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 		  if (config.debug.output == true) {
 			  console.log("Session extended now seding a message");
 		  }
-		  clients[uniqid].extendSession({'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-')});
-		  
-		  //@todo If client is disconnedted this one is not send. Add to scheduler
+		  clients[uniqid].extendSession({'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-')});		  		
 		  clients[uniqid].sendMessage(req.body.operator_username,req.body.message);
 	  }
 })

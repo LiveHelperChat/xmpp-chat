@@ -5,7 +5,7 @@ ltx  = require('node-xmpp-core').ltx;
 var XMPPClient = function(params) {
 
 	var _that = this;  
-	this.isLogged = true;
+	this.isLogged = false;
 	this.inactivtyTimeout = null;
 	this.disconnectTimeout = null;
 	this.removeCallback = params['cb'];
@@ -73,12 +73,21 @@ XMPPClient.prototype.logout = function(){
 	this.isLogged = false;
 };
 
-XMPPClient.prototype.sendMessage = function(to, message){
+XMPPClient.prototype.sendMessage = function(to, message) {	
+	
 	var stanza = new ltx.Element(
-        'message',
-        { to: to, type: 'chat' }
-    ).c('body').t(message)
-    this.client.send(stanza);
+	        'message',
+	        { to: to, type: 'chat' }
+	    ).c('body').t(message);
+	    
+	if (this.isLogged == true) {	
+	    this.client.send(stanza);
+	} else { // We are not logged, give 3 seconds to login and try again to send
+		var _this = this;
+		setTimeout(function() {
+			_this.client.send(stanza);
+	  },3000);
+	}
 };
 
 // @todo format message content using some xml generators
