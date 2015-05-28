@@ -27,5 +27,8 @@
     "errorhandler": "^1.3.5",
     "express": "^4.12.3",
     "node-xmpp-client": "^1.0.0-alpha20"
+  },
+  "devDependencies": {
+    "node-xmpp-core": "^1.0.0-alpha14"
   }
 }

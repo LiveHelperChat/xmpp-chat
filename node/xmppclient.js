@@ -1,5 +1,6 @@
 var Client = require('node-xmpp-client'),
-config = require('./settings'); 
+config = require('./settings'),
+ltx  = require('node-xmpp-core').ltx;
 
 var XMPPClient = function(params) {
 
@@ -10,6 +11,7 @@ var XMPPClient = function(params) {
 	this.removeCallback = params['cb'];
 	this.paramsClient = {'jid':params['jid'],'host':params['host'],'client_id':params['client_id']};
 	this.nick = (typeof params['nick'] !== 'undefined' ? params['nick'] : 'Online visitor');
+	this.status = (typeof params['status'] !== 'undefined' ? params['status'] : '-');
 	
 	this.client = new Client({
 		jid: params['jid'],
@@ -71,21 +73,54 @@ XMPPClient.prototype.logout = function(){
 	this.isLogged = false;
 };
 
+XMPPClient.prototype.sendMessage = function(to, message){
+	var stanza = new ltx.Element(
+        'message',
+        { to: to, type: 'chat' }
+    ).c('body').t(message)
+    this.client.send(stanza);
+};
+
 // @todo format message content using some xml generators
 XMPPClient.prototype.onlineHandler = function() {
-	this.client.send("<presence><status>Online visitor"+"\n"+"Other information user\n"+"</status><nick xmlns='http://jabber.org/protocol/nick'>"+this.nick+"</nick></presence>");	
+	//this.client.send("<presence><status>Online visitor"+"\n"+"Other information user\n"+"</status><nick xmlns='http://jabber.org/protocol/nick'>"+this.nick+"</nick></presence>");	
+		
+	var presence = new ltx.Element('presence');
+	presence.c('status').t(this.status);
+	presence.c('nick',{xmlns : 'http://jabber.org/protocol/nick'}).t(this.nick);
+	
+	this.client.send(presence);
+		
 	this.isLogged = true;
 };
 
 //properties and methods
-XMPPClient.prototype.extendSession = function(){
+XMPPClient.prototype.extendSession = function(params){
 
+	var needSync = false;
+	
+	if (typeof params['nick'] !== 'undefined' && this.nick != params['nick']) {
+			needSync = true;
+			this.nick = params['nick'];
+	}
+	
+	if (typeof params['status'] !== 'status' && this.status != params['status']) {
+			needSync = true;
+			this.status = params['status'];
+	}
+	
 	var _that = this;
 
 	if (this.isLogged == false){
 		this.client.connect();
+		needSync = false;
 	}
-
+	
+	// Something changed we need to sync
+	if (needSync == true) {
+		this.onlineHandler();
+	}
+	
 	clearTimeout(this.inactivtyTimeout);
 	clearTimeout(this.disconnectTimeout);
 

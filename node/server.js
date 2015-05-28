@@ -51,6 +51,7 @@ app.post('/xmpp', jsonParser, function (req, res) {
 			  'jid':req.body.jid,
 			  'pass':req.body.pass,
 			  'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),
+			  'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-'),
 			  'host':req.body.host,
 			  'cb' : function(params){
 				  delete clients[params.client_id];
@@ -66,9 +67,62 @@ app.post('/xmpp', jsonParser, function (req, res) {
 		  if (config.debug.output == true) {
 			  console.log("Session extend");
 		  }
-		  clients[uniqid].extendSession();
+		  
+		  clients[uniqid].extendSession({'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-')});
 	  }
 })
+
+
+app.post('/xmpp-send-message', jsonParser, function (req, res) {
+	  if (!req.body) return res.sendStatus(400)
+	  
+	  res.send('ok');
+	  
+	  // Initiate xmpp client
+	  var uniqid = md5(req.body.jid+req.body.pass+req.body.host);
+	  
+	  if (typeof clients[uniqid] === 'undefined') {		  
+		  if (config.debug.output == true) {
+			  console.log("Sending message to operator");
+		  }		  
+		  try {
+			  clients[uniqid] = new xmppClient({
+			  'client_id':uniqid,
+			  'jid':req.body.jid,
+			  'pass':req.body.pass,
+			  'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),
+			  'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-'),
+			  'host':req.body.host,			 
+			  'cb' : function(params){
+				  delete clients[params.client_id];
+			  }});
+			  
+			  // Give some time to connect and send message
+			  // @todo remake
+			  setTimeout(function(){
+				  clients[uniqid].sendMessage(req.body.operator_username,req.body.message);
+				  console.log("Senbding message delayed");
+			  },3000);
+			 
+			  
+		  } catch (err) {
+			  if (config.debug.output == true) {
+				  console.log("Error during setting a state "+err.message);
+			  }							
+		  }
+		  
+	  } else {
+		  if (config.debug.output == true) {
+			  console.log("Session extended now seding a message");
+		  }
+		  clients[uniqid].extendSession({'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-')});
+		  
+		  //@todo If client is disconnedted this one is not send. Add to scheduler
+		  clients[uniqid].sendMessage(req.body.operator_username,req.body.message);
+	  }
+})
+
+
 
 /**
  * Register online visitor and addign him to visitors roaster and make online in single request

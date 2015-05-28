@@ -8,7 +8,7 @@ settings.http_address_lhc = 'livehelperchat.com';
 /**
  * To what address listen
  * */
-settings.listen_address = 'localhost';
+settings.listen_address = '95.85.55.134';
 
 /**
  * To what port to listen
