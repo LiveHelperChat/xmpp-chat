@@ -113,7 +113,7 @@ XMPPClient.prototype.extendSession = function(params){
 			this.nick = params['nick'];
 	}
 	
-	if (typeof params['status'] !== 'status' && this.status != params['status']) {
+	if (typeof params['status'] !== 'undefined' && this.status != params['status']) {
 			needSync = true;
 			this.status = params['status'];
 	}

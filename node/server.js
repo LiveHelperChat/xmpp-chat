@@ -86,12 +86,13 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 			  console.log("Sending message to operator");
 		  }		  
 		  try {
+			 
 			  clients[uniqid] = new xmppClient({
 			  'client_id':uniqid,
 			  'jid':req.body.jid,
 			  'pass':req.body.pass,
 			  'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),
-			  'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-'),
+			  'status':(typeof req.body.status !== 'undefined' ? req.body.status : ''),
 			  'host':req.body.host,			 
 			  'cb' : function(params){
 				  delete clients[params.client_id];
@@ -110,7 +111,14 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 		  if (config.debug.output == true) {
 			  console.log("Session extended now seding a message");
 		  }
-		  clients[uniqid].extendSession({'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-')});		  		
+		  
+		  var paramsExtend = {'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor')};
+		  
+		  if (typeof req.body.status !== 'undefined') {
+			  paramsExtend.status = req.body.status;
+		  }
+		  
+		  clients[uniqid].extendSession(paramsExtend);		  		
 		  clients[uniqid].sendMessage(req.body.operator_username,req.body.message);
 	  }
 })
