@@ -161,6 +161,8 @@ app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
 							  'jid':req.body.user+'@'+req.body.host,
 							  'pass':req.body.password,
 							  'host':req.body.hostlogin,
+							  'nick':(typeof req.body.nick !== 'undefined' ? req.body.nick : 'Online visitor'),
+							  'status':(typeof req.body.status !== 'undefined' ? req.body.status : ''),
 							  'cb' : function(params){
 								  delete clients[params.client_id];
 							}});
@@ -295,6 +297,34 @@ app.post('/xmpp-delete-user-from-roaster', jsonParser, function (req, res) {
 		res.send(JSON.stringify(response));
 	}
 })
+
+// Deletes user from XMPP
+app.post('/xmpp-delete-user', jsonParser, function (req, res) {
+	if (!req.body) return res.sendStatus(400)	  
+	
+	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined')
+	{
+		child = exec(config.ejabberdctl + " unregister " + escapeShell(req.body.user) + " " + escapeShell(req.body.host), function (error, stdout, stderr) {
+			if (config.debug.output == true) {
+				console.log('stdout: ' + stdout);
+				console.log('stderr: ' + stderr);
+			}
+			
+			if (error !== null) {
+				var response = {'error':true,'msg':stderr+stdout};
+			} else {
+				var response = {'error':false,'msg':stdout};
+			}
+			
+			res.send(JSON.stringify(response));
+		});  
+	} else {
+		var response = {'error':false,'msg':'Invalid arguments'};
+		res.send(JSON.stringify(response));
+	}
+})
+
+
 
 app.post('/xmpp-testing-json', jsonParser, function (req, res) {
 	if (!req.body) return res.sendStatus(400)	
