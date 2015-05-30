@@ -25,12 +25,12 @@ settings.ejabberdctl = '/opt/ejabberd-15.04/bin/ejabberdctl'
 /**
  * How long online visitor should be considered as online. Miliseconds
  * */
-settings.online_timeout = 50000;
+settings.online_timeout = 10000;
 
 /**
  * After how many seconds after disconnect we should inform LHC that visitor is offline
  * */
-settings.online_timeout_destroy = 50000;
+settings.online_timeout_destroy = 15000;
 
 settings.debug = {};
 

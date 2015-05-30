@@ -32,20 +32,25 @@
 -include("ejabberd_http.hrl").
 -include("jlib.hrl").
 
--export([start/2, stop/1, on_set/4, on_unset/4,on_filter_packet/1]).
+-export([start/2, stop/1, on_set/4, on_unset/4,on_filter_packet/1,create_message/3]).
 
 start(Host, _Opts) ->
    ejabberd_hooks:add(set_presence_hook, Host, ?MODULE, on_set, 50),
    ejabberd_hooks:add(unset_presence_hook, Host, ?MODULE, on_unset, 50),
    ejabberd_hooks:add(filter_packet, global, ?MODULE, on_filter_packet, 50),
+   ejabberd_hooks:add(offline_message_hook, Host, ?MODULE, create_message, 50),
    ok.
 
 stop(Host) ->
    ejabberd_hooks:delete(set_presence_hook, Host, ?MODULE, on_set, 50),
    ejabberd_hooks:delete(unset_presence_hook, Host, ?MODULE, on_unset, 50),
    ejabberd_hooks:delete(filter_packet, global, ?MODULE, on_filter_packet, 50),
+   ejabberd_hooks:delete(offline_message_hook, Host, ?MODULE, create_message, 50),
    ok.
-   
+			 
+create_message(_From, _To, _Packet) ->
+   stop.
+    
 on_filter_packet({From, To, XML} = Packet) ->
         
     #jid{user = LUser, lserver = LServer} = From,

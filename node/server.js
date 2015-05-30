@@ -78,6 +78,8 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 	  
 	  res.send('ok');
 	  
+	  console.log("CALLING xmpp-send-message");
+	  
 	  // Initiate xmpp client
 	  var uniqid = md5(req.body.jid+req.body.pass+req.body.host);
 	  

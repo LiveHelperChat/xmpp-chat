@@ -50,11 +50,17 @@ var XMPPClient = function(params) {
 		clearTimeout(_that.disconnectTimeout);
 		
 		_that.disconnectTimeout = setTimeout(function(){
+			if (config.debug.output == true) {
+				console.log('Inactivity after offline triggered');
+			}
 			_that.disconnecTimeoutHandler();
 		},config.online_timeout_destroy);	  
 	})
 
 	this.inactivtyTimeout = setTimeout(function(){
+		if (config.debug.output == true) {
+			console.log('Inactivity timeout triggered main');
+		}
 		_that.logout();
 	},config.online_timeout);
 }
@@ -66,6 +72,9 @@ XMPPClient.prototype.disconnecTimeoutHandler = function(){
 	
 	this.removeCallback(this.paramsClient);
 	delete this.client;
+	
+	clearTimeout(this.disconnectTimeout);
+	clearTimeout(this.inactivtyTimeout);	
 };
 
 XMPPClient.prototype.logout = function(){
@@ -74,6 +83,8 @@ XMPPClient.prototype.logout = function(){
 };
 
 XMPPClient.prototype.sendMessage = function(to, message) {	
+	
+	console.log("Calling send message");
 	
 	var stanza = new ltx.Element(
 	        'message',
@@ -90,16 +101,14 @@ XMPPClient.prototype.sendMessage = function(to, message) {
 	}
 };
 
-// @todo format message content using some xml generators
-XMPPClient.prototype.onlineHandler = function() {
-	//this.client.send("<presence><status>Online visitor"+"\n"+"Other information user\n"+"</status><nick xmlns='http://jabber.org/protocol/nick'>"+this.nick+"</nick></presence>");	
-		
+/**
+ * Sends presence of online visitor
+ * */
+XMPPClient.prototype.onlineHandler = function() {		
 	var presence = new ltx.Element('presence');
 	presence.c('status').t(this.status);
-	presence.c('nick',{xmlns : 'http://jabber.org/protocol/nick'}).t(this.nick);
-	
-	this.client.send(presence);
-		
+	presence.c('nick',{xmlns : 'http://jabber.org/protocol/nick'}).t(this.nick);	
+	this.client.send(presence);		
 	this.isLogged = true;
 };
 
@@ -134,6 +143,9 @@ XMPPClient.prototype.extendSession = function(params){
 	clearTimeout(this.disconnectTimeout);
 
 	this.inactivtyTimeout = setTimeout(function(){
+		if (config.debug.output == true) {
+			console.log('Inactivity timeout triggered');
+		}
 		_that.logout();
 	},config.online_timeout);
 };
