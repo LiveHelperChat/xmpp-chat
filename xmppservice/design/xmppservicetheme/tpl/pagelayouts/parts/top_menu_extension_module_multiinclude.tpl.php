@@ -1,0 +1,1 @@
+<?php $hasExtensionModule = $currentUser->hasAccessTo('lhlhcxmpp','configure') || (isset($hasExtensionModule) ? $hasExtensionModule : false);?>

@@ -1,0 +1,1 @@
+<?php $xmppservice_tab_enabled_pre = true?>

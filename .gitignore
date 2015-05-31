@@ -1,2 +1,3 @@
 node/node_modules
 ejabberd_mod/compile.sh
+xmppservice/settings/settings.ini.php
