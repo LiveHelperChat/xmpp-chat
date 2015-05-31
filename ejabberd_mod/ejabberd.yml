@@ -1,15 +1,15 @@
   mod_lhc: 
     ## Used in standalone enviroment
-    message_address: "http://dev.coral.lt/~remigijusk/testpost.php"
-    login_address: "http://localhost:4567/xmpp-testing-json"
-    logout_address: "http://localhost:4567/xmpp-testing-json"
+    message_address: "http://example.com/xmppservice/processmessage"
+    login_address: "http://example.com/xmppservice/operatorstatus"
+    logout_address: "http://example.com/xmppservice/operatorstatus"
   mod_lhcping:
     send_pings: true
-    ping_interval: 6
+    ping_interval: 180
     timeout_action: kill
     ## Used in standalone enviroment
-    ping_address: "http://localhost:4567/xmpp-testing-json"
-    
+    ping_address: "http://example.com/xmppservice/operatorstatus"
+
 ## Disable mod_offline    
 ## mod_offline: 
 ##  access_max_user_messages: max_user_offline_messages\

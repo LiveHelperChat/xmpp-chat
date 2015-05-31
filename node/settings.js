@@ -1,7 +1,7 @@
 var settings = {}
 
 /**
- * Main address of LHC installation
+ * Main address of LHC installation. At the moment not used, but will be used in automated hosting enviroment
  * */
 settings.http_address_lhc = 'livehelperchat.com';
 
@@ -24,13 +24,10 @@ settings.ejabberdctl = '/opt/ejabberd-15.04/bin/ejabberdctl'
 
 /**
  * How long online visitor should be considered as online. Miliseconds
+ * 
+ * It's 5 minutes at the moment 5 * 60 * 1000
  * */
-settings.online_timeout = 10000;
-
-/**
- * After how many seconds after disconnect we should inform LHC that visitor is offline
- * */
-settings.online_timeout_destroy = 15000;
+settings.online_timeout = 300000;
 
 settings.debug = {};
 
