@@ -7,7 +7,6 @@ var XMPPClient = function(params) {
 	var _that = this;  
 	this.isLogged = false;
 	this.inactivtyTimeout = null;
-	this.disconnectTimeout = null;
 	this.removeCallback = params['cb'];
 	this.paramsClient = {'jid':params['jid'],'host':params['host'],'client_id':params['client_id']};
 	this.nick = (typeof params['nick'] !== 'undefined' ? params['nick'] : 'Online visitor');
@@ -47,14 +46,7 @@ var XMPPClient = function(params) {
 			console.log('Client is disconnected')
 		}
 		_that.isLogged = false;
-		clearTimeout(_that.disconnectTimeout);
-		
-		_that.disconnectTimeout = setTimeout(function(){
-			if (config.debug.output == true) {
-				console.log('Inactivity after offline triggered');
-			}
-			_that.disconnecTimeoutHandler();
-		},config.online_timeout_destroy);	  
+		_that.disconnecTimeoutHandler();
 	})
 
 	this.inactivtyTimeout = setTimeout(function(){
@@ -67,14 +59,12 @@ var XMPPClient = function(params) {
 
 XMPPClient.prototype.disconnecTimeoutHandler = function(){
 	if (config.debug.output == true) {
-		console.log("Execute request to remove user from ejabberd goes to PHP plugin");
+		console.log("Inactivity timeout reached");
 	}
 	
+	clearTimeout(this.inactivtyTimeout);	
 	this.removeCallback(this.paramsClient);
 	delete this.client;
-	
-	clearTimeout(this.disconnectTimeout);
-	clearTimeout(this.inactivtyTimeout);	
 };
 
 XMPPClient.prototype.logout = function(){
@@ -83,9 +73,7 @@ XMPPClient.prototype.logout = function(){
 };
 
 XMPPClient.prototype.sendMessage = function(to, message) {	
-	
-	console.log("Calling send message");
-	
+		
 	var stanza = new ltx.Element(
 	        'message',
 	        { to: to, type: 'chat' }
@@ -129,7 +117,7 @@ XMPPClient.prototype.extendSession = function(params){
 	
 	var _that = this;
 
-	if (this.isLogged == false){
+	if (this.isLogged == false) {
 		this.client.connect();
 		needSync = false;
 	}
@@ -140,7 +128,6 @@ XMPPClient.prototype.extendSession = function(params){
 	}
 	
 	clearTimeout(this.inactivtyTimeout);
-	clearTimeout(this.disconnectTimeout);
 
 	this.inactivtyTimeout = setTimeout(function(){
 		if (config.debug.output == true) {
