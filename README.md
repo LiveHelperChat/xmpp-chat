@@ -11,8 +11,7 @@ This is repository for future full XMPP chat support. This is beta version of en
 
 ### LHC extension requirements
  * Option to create an XMPP users and assign operators to them.
- * It should cleanup expired users from ejabberd virtual hosts.
- * It should be able to handle three types of accounts, chat/online visitor/operator
+ * It should be able to handle three types of accounts, [chat]/[online visitor]/[operator]
  * Online visitors/chats account should be expirable
  * Admin can select should selected operator receives new chat request's or not.
  * If operator sends a message to chat but chat has already another owner, operator is informed that chat was already accepted
