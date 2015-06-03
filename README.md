@@ -19,6 +19,13 @@ This is repository for future full XMPP chat support. This is beta version of en
  * If operator writes a message to chat and chat is still pending chat owner becames XMPP sender and his message is send to user.
  * Support for automated hosting... [Pending]
 
+### Username constructing patterns
+ * visitors.[visitor_id]@xmpp.example.com
+ * visitors.[chat_id].chat@xmpp.example.com
+ * Shared roasters should be constructed like
+  * visitors
+  * operators
+
 ### Visitor comes to site (node server takes care of this API)
  * LHC extension checks does passed online user has assigned XMPP user.
  * If user does not exists create xmpp account
@@ -55,4 +62,11 @@ This is repository for future full XMPP chat support. This is beta version of en
  * mod_lhc also handles offline messages and forwards them to HTTP
  
 ### Autoamated hosting workflow
- * At the moment top secret :D
+ * Each operator in instrance will get username contructed in [username].[instance_name]@xmpp.example.com
+ * Each visitor instance will get username constructed like visitor.[visitor_id].[instance_name]@xmpp.example.com
+  * [instance_name] cannot be "chat"
+ * Each direct chat xmpp username should be constructed like visitor.[chat_id].[chat].[instance_name]@xmpp.example.com
+ * Each instance will two shared roasters should be constructed like 
+  * visitors.[instance_id]
+  * operators.[instance_id]
+ * LHC extension interface should represent very first requirement
