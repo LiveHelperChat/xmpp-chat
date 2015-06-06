@@ -28,9 +28,13 @@ class erLhcoreClassXMPPServiceAccountValidator
                 {
                     $Errors[] =  erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operatorvalidator','Please enter a username');
                 } else {
+                                      
                     if (strpos($form->username, 'visitor') === false) {
-                        if ($form->username != 'admin') {
-                            $xmppAccount->username = $form->username . '@' . erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host'];
+                        if (preg_match('/[^a-z_0-9]/i', $form->username)) {
+                             $Errors[] = erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operatorvalidator','Not allowed characters detected');
+                        } elseif ($form->username != 'admin') {
+                            $subdomain = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
+                            $xmppAccount->username = $form->username . ($subdomain != '' ? '.'.$subdomain : '') . '@' . erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host'];
                         } else {
                             $Errors[] = erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operatorvalidator','Admin is reserved username and can not be used');
                         }

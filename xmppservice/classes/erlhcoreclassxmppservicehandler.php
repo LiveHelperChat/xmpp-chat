@@ -171,12 +171,18 @@ class erLhcoreClassExtensionXmppserviceHandler
         
         $userParts = explode('@', $xmppAccount->username);
         
+        // Append automated hosting subdomain if required
+        $subdomainUser = '';
+        if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'] != '') {
+            $subdomainUser = '.' . $this->settings['subdomain'];
+        }
+                
         // Delete from shared roaster first
         $data = array(
             "user" => $userParts[0],
             "host" => $params['xmpp_host'],
             "grouphost" => $params['xmpp_host'],
-            "group" => $xmppAccount->type == erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR ? 'operators' : 'visitors'
+            "group" => $xmppAccount->type == erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR ? 'operators'.$subdomainUser : 'visitors'.$subdomainUser
         );
         
         try {
@@ -454,13 +460,20 @@ class erLhcoreClassExtensionXmppserviceHandler
         
         $paramsChat = self::getNickAndStatusByChat($params['chat']);
         
-        $data = array(
+        // Append automated hosting subdomain if required
+        $subdomainUser = '';
+        if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'] != '') {
+            $subdomainUser = '.' . $this->settings['subdomain'];
+        }
+        
+        $data = array (
             "user" => $userParts[0],
             "host" => $params['xmpp_host'],
             "password" => $xmppAccount->password,
             "hostlogin" => $params['host_login'],
             "nick" => $paramsChat['nick'],
-            "status" => $paramsChat['status']
+            "status" => $paramsChat['status'],
+            'group' => 'visitors' . $subdomainUser
         );
         
         try {
@@ -535,11 +548,17 @@ class erLhcoreClassExtensionXmppserviceHandler
             throw new Exception('Could not register operator in XMPP server!');
         }
         
+        // Append automated hosting subdomain if required
+        $subdomainUser = '';
+        if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'] != '') {
+            $subdomainUser = '.' . $this->settings['subdomain'];
+        }
+        
         // Assign user to operators roaster
         $data = array(
             "user" => $params['xmpp_account']->username_plain,
             "host" => $params['xmpp_host'],
-            "group" => 'operators',
+            "group" => 'operators' . $subdomainUser,
             "grouphost" => $params['xmpp_host']
         );
         
@@ -573,13 +592,20 @@ class erLhcoreClassExtensionXmppserviceHandler
         
         $paramsOnlineUser = self::getNickAndStatusByOnlineVisitor($params['ou']);
         
+        // Append automated hosting subdomain if required
+        $subdomainUser = '';
+        if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'] != '') {
+            $subdomainUser = '.' . $this->settings['subdomain'];
+        }
+        
         $data = array(
             "user" => $userParts[0],
             "host" => $params['xmpp_host'],
             "password" => $xmppAccount->password,
             "hostlogin" => $params['host_login'],
             "nick" => $paramsOnlineUser['nick'],
-            "status" => $paramsOnlineUser['status']
+            "status" => $paramsOnlineUser['status'],
+            "group" => 'visitors' . $subdomainUser
         );
         
         try {
@@ -598,6 +624,80 @@ class erLhcoreClassExtensionXmppserviceHandler
         self::cleanupOldXMPPAccounts();
     }
 
+    /**
+     * Get's called then instance is destroyed
+     * 
+     * */
+    public static function instanceDestroyed($params)
+    {
+        // Delete visitors shared roaster
+        $data[] = array(
+            "group" => "visitors.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+        );
+        
+        $data[] = array(
+            "group" => "operators.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+        );
+        
+        foreach ($data as $groupData)
+        {
+            try {
+                $response = self::sendRequest($params['node_api_server'] . '/xmpp-delete-instance-roasters', $groupData);
+            
+                if ($response['error'] == true) {
+                    throw new Exception($response['msg']);
+                }
+            
+            } catch (Exception $e) {
+                if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                    erLhcoreClassLog::write(print_r($e, true));
+                }
+            }
+        }   
+    }
+        
+    /**
+     * Creates required shared roasters
+     * */
+    public static function registerInstanceRoasters($params) {
+        
+        // First register visitors shared roaster
+        $data[] = array(
+              "group" => "visitors.".$params['subdomain'],
+              "host" => $params['xmpp_host'],
+              "name" => "Visitors",
+              "desc" => "Visitors",
+              "display" => '\"\"'
+        );
+        
+        // Register operators shared roaster
+        $data[] = array(
+            "group" => "operators.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+            "name" => "Operators",
+            "desc" => "Operators",
+            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"'
+        );
+        
+        foreach ($data as $groupData)
+        {
+            try {
+                $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $groupData);
+            
+                if ($response['error'] == true) {
+                    throw new Exception($response['msg']);
+                }
+                
+            } catch (Exception $e) {
+                if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                    erLhcoreClassLog::write(print_r($e, true));
+                }
+            }
+        }
+    }
+    
     /**
      * *
      *
