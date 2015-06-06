@@ -130,7 +130,7 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
 	if (!req.body) return res.sendStatus(400)	  
 	
-	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.password !== 'undefined')
+	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.password !== 'undefined' && typeof req.body.group !== 'undefined')
 	{
 		child = exec(config.ejabberdctl + " register " + escapeShell(req.body.user) + " " + escapeShell(req.body.host) + " "+escapeShell(req.body.password), function (error, stdout, stderr) {
 			if (config.debug.output == true) {
@@ -143,7 +143,7 @@ app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
 				
 			} else {			
 				// Assign user to visitors roaster
-				child = exec(config.ejabberdctl + " srg_user_add " + escapeShell(req.body.user) + " " + escapeShell(req.body.host) + " " + escapeShell('visitors') + " " + escapeShell(req.body.host), function (error, stdout, stderr) {
+				child = exec(config.ejabberdctl + " srg_user_add " + escapeShell(req.body.user) + " " + escapeShell(req.body.host) + " " + escapeShell(req.body.group) + " " + escapeShell(req.body.host), function (error, stdout, stderr) {
 					if (config.debug.output == true) {
 						console.log('stdout: ' + stdout);
 						console.log('stderr: ' + stderr);
@@ -324,6 +324,70 @@ app.post('/xmpp-delete-user-from-roaster', jsonParser, function (req, res) {
 		res.send(JSON.stringify(response));
 	}
 })
+
+/**
+ * Setups instance roasters
+ * ejabberdctl srg_create "operators.testing" "xmpp.livehelperchat.com" "Operators" "Operators" \"visitors\\noperators\"
+ * 
+ * srg_create group host name description display
+ * */
+app.post('/xmpp-setup-instance-roasters', jsonParser, function (req, res) {
+	if (!req.body) return res.sendStatus(400)	  
+	
+	if (typeof req.body.group !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.name !== 'undefined' && typeof req.body.desc !== 'undefined' && typeof req.body.display !== 'undefined')
+	{
+		child = exec(config.ejabberdctl + " srg_create " + escapeShell(req.body.group) + " " + escapeShell(req.body.host) + " " + escapeShell(req.body.name) + " " + escapeShell(req.body.desc)+" "+req.body.display, function (error, stdout, stderr) {
+			if (config.debug.output == true) {
+				console.log('stdout: ' + stdout);
+				console.log('stderr: ' + stderr);
+			}
+			
+			if (error !== null) {
+				var response = {'error':true,'msg':stderr+stdout};
+			} else {
+				var response = {'error':false,'msg':stdout};
+			}
+			
+			res.send(JSON.stringify(response));
+		}); 
+	} else {
+		var response = {'error':true,'msg':'Invalid arguments'};
+		res.send(JSON.stringify(response));
+	}
+})
+
+
+/**
+ * Deletes shared roaster
+ * ejabberdctl  srg_delete group host
+ * */
+app.post('/xmpp-delete-instance-roasters', jsonParser, function (req, res) {
+	if (!req.body) return res.sendStatus(400)	  
+	
+	if (typeof req.body.group !== 'undefined' && typeof req.body.host !== 'undefined')
+	{
+		child = exec(config.ejabberdctl + " srg_delete " + escapeShell(req.body.group) + " " + escapeShell(req.body.host), function (error, stdout, stderr) {
+			if (config.debug.output == true) {
+				console.log('stdout: ' + stdout);
+				console.log('stderr: ' + stderr);
+			}
+			
+			if (error !== null) {
+				var response = {'error':true,'msg':stderr+stdout};
+			} else {
+				var response = {'error':false,'msg':stdout};
+			}
+			
+			res.send(JSON.stringify(response));
+		}); 
+	} else {
+		var response = {'error':true,'msg':'Invalid arguments'};
+		res.send(JSON.stringify(response));
+	}
+})
+
+
+
 
 app.post('/xmpp-testing-json', jsonParser, function (req, res) {
 	if (!req.body) return res.sendStatus(400)	
