@@ -16,9 +16,9 @@ This is repository for future full XMPP chat support. This is beta version of en
  * Admin can select should selected operator receives new chat request's or not.
  * If operator sends a message to chat but chat has already another owner, operator is informed that chat was already accepted
  * If operator writes a message to chat and chat is still pending chat owner becames XMPP sender and his message is send to user.
- * Support for automated hosting... [Pending]
+ * It supports automated hosting also.
 
-### Username constructing patterns
+### Username constructing patterns in standalone enviroment
  * visitors.[visitor_id]@xmpp.example.com
  * visitors.[chat_id].chat@xmpp.example.com
  * Shared roasters should be constructed like
@@ -36,7 +36,7 @@ This is repository for future full XMPP chat support. This is beta version of en
  * Operator writes message to user using XMPP client.
  * Intercept message at ejabberd lhc extension and there execute callback to lhc module.
  * Mod should send messages only if sender is an operator.
- * If we find active chat [based on assigned chat_id to online visitor] we append message to chat if not we write this as invitation to chat to online visitor. [Implemented]
+ * If we find active chat [based on assigned chat_id to online visitor] we append message to chat if not we write this as invitation to chat to online visitor.
  
 ### Visitor starts a chat [node]
  * First we check does chat has assigned online visitor id and if online visitor has a xmpp account record under it.
@@ -64,8 +64,9 @@ This is repository for future full XMPP chat support. This is beta version of en
  * Each operator in instrance will get username contructed in [username].[instance_name]@xmpp.example.com
  * Each visitor instance will get username constructed like visitor.[visitor_id].[instance_name]@xmpp.example.com
   * [instance_name] cannot be "chat"
- * Each direct chat xmpp username should be constructed like visitor.[chat_id].[chat].[instance_name]@xmpp.example.com
+ * Each direct chat xmpp username should be constructed like visitor.[chat_id].chat.[instance_name]@xmpp.example.com
  * Each instance will two shared roasters should be constructed like 
-  * visitors.[instance_id]
-  * operators.[instance_id]
- * LHC extension interface should represent very first requirement
+  * visitors.[instance_name]
+  * operators.[instance_name]
+ * Then instance is created extension should precreate these two shared roasters
+ * Once instance is destroyed shared roasters and users should be unregistered from ejabberd
