@@ -65,7 +65,7 @@ This is repository for future full XMPP chat support. This is beta version of en
  * Each visitor instance will get username constructed like visitor.[visitor_id].[instance_name]@xmpp.example.com
   * [instance_name] cannot be "chat"
  * Each direct chat xmpp username should be constructed like visitor.[chat_id].chat.[instance_name]@xmpp.example.com
- * Each instance will two shared roasters should be constructed like 
+ * Each instance will have two shared roasters, they should be constructed following this pattern
   * visitors.[instance_name]
   * operators.[instance_name]
  * Then instance is created extension should precreate these two shared roasters
