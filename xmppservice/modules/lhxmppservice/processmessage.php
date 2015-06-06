@@ -1,18 +1,20 @@
 <?php 
 
-/* $params = array(		
+/* This is what messages looks like
+$params = array(		
 		'body' => 'PArasiau vartotojui zinute',
 		'sender' => 'remdex2',
 		'receiver' => 'visitor.6034.chat',
 		'server' => 'xmpp.livehelperchat.com'
 ); */
 
-/* erLhcoreClassLog::write(print_r($_POST,true));
+//erLhcoreClassLog::write(print_r($_POST,true));
 
-body] => asdasd
-[sender] => remdex2
-[receiver] => visitor.6034.chat
-[server] => xmpp.livehelperchat.com */
+
+if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['enabled'] == false) {
+    erLhcoreClassModule::redirect('/');
+    exit ;
+}
 
 $params = array (
 		'body' => isset($_POST['body']) ? $_POST['body'] : '',

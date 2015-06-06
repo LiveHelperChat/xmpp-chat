@@ -1,5 +1,11 @@
 <?php
 
+if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['enabled'] == false) {
+    erLhcoreClassModule::redirect('/');
+    exit ;
+}
+
+
 $tpl = erLhcoreClassTemplate::getInstance('lhxmppservice/operators.tpl.php');
 
 if (isset($_GET['doSearch'])) {
