@@ -16,7 +16,7 @@ Config example for standalone enviroment. Change address to your lhc installatio
     logout_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
   mod_lhcping:
     send_pings: true
-    ping_interval: 6
+    ping_interval: 250
     timeout_action: kill
     ## Used in ah enviroment
     ahenviroment: false
@@ -39,7 +39,7 @@ in this enviroment message_address,login_address,logout_address,ping_address are
     logout_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
   mod_lhcping:
     send_pings: true
-    ping_interval: 6
+    ping_interval: 250
     timeout_action: kill
     ## Used in ah enviroment
     ahenviroment: true
