@@ -1,4 +1,4 @@
-# xmpp-chat
+# XMPP Chat for live helper chat
 This is repository for full XMPP chat support in Live Helper Chat. Standalone and Automated hosting enviroments are supported.
 Folders structure
  * ejabberd_mod - contains two ejabberd mods required for chat integration
