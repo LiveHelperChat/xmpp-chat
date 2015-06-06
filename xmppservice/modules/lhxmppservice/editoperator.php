@@ -1,5 +1,10 @@
 <?php 
 
+if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['enabled'] == false) {
+    erLhcoreClassModule::redirect('/');
+    exit ;
+}
+
 $tpl = erLhcoreClassTemplate::getInstance('lhxmppservice/editoperator.tpl.php');
 
 $xmppaccount =  erLhcoreClassModelXMPPAccount::fetch($Params['user_parameters']['id']);
@@ -18,7 +23,7 @@ if (ezcInputForm::hasPostData()) {
             erLhcoreClassXMPPServiceAccountValidator::publishXMPPAccount($xmppaccount);
                        
             erLhcoreClassModule::redirect('xmppservice/operators');
-            exit ;
+            exit;
             
         } catch (Exception $e) {
             $tpl->set('errors',array($e->getMessage()));
