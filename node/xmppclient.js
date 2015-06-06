@@ -31,7 +31,11 @@ var XMPPClient = function(params) {
 	this.client.on('error', function(err) {
 		if (config.debug.output == true) {
 			console.log('Error here '+err);
-		}			   
+		}
+		console.log(_that.paramsClient);
+		_that.logout();
+		_that.removeCallback(_that.paramsClient);
+		clearTimeout(_that.inactivtyTimeout);
 	});
 
 	this.client.on('offline', function () {
@@ -64,7 +68,6 @@ XMPPClient.prototype.disconnecTimeoutHandler = function(){
 	
 	clearTimeout(this.inactivtyTimeout);	
 	this.removeCallback(this.paramsClient);
-	delete this.client;
 };
 
 XMPPClient.prototype.logout = function(){

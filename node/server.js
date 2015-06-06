@@ -34,7 +34,12 @@ var escapeShell = function(cmd) {
  * Processes request for setting online visitor as online in xmpp server
  * */
 app.post('/xmpp', jsonParser, function (req, res) {
+		 
 	  if (!req.body) return res.sendStatus(400)
+	  
+	  if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+	  }	  
 	  
 	  res.send('ok');
 	  
@@ -54,7 +59,7 @@ app.post('/xmpp', jsonParser, function (req, res) {
 			  'status':(typeof req.body.status !== 'undefined' ? req.body.status : '-'),
 			  'host':req.body.host,
 			  'cb' : function(params){
-				  delete clients[params.client_id];
+				  delete clients[params.client_id];				  
 			  }});
 			  
 		  } catch (err) {
@@ -75,6 +80,10 @@ app.post('/xmpp', jsonParser, function (req, res) {
 app.post('/xmpp-send-message', jsonParser, function (req, res) {
 	  if (!req.body) return res.sendStatus(400)
 	  
+	  if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+	  }
+	  
 	  res.send('ok');
 	 	  
 	  // Initiate xmpp client
@@ -82,7 +91,7 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
 	  
 	  if (typeof clients[uniqid] === 'undefined') {		  
 		  if (config.debug.output == true) {
-			  console.log("Sending message to operator");
+			  console.log("Sending message to operator length.array ");
 		  }		  
 		  try {
 			 
@@ -128,7 +137,11 @@ app.post('/xmpp-send-message', jsonParser, function (req, res) {
  * Register online visitor and addign him to visitors roaster and make online in single request
  * */
 app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)	
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.password !== 'undefined' && typeof req.body.group !== 'undefined')
 	{
@@ -189,7 +202,11 @@ app.post('/xmpp-register-online-visitor', jsonParser, function (req, res) {
  * Register account in XMPP server
  * */
 app.post('/xmpp-register', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)	
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.password !== 'undefined')
 	{
@@ -217,7 +234,11 @@ app.post('/xmpp-register', jsonParser, function (req, res) {
  * Changes password for operator
  * */
 app.post('/xmpp-change-password', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.password !== 'undefined')
 	{
@@ -245,7 +266,11 @@ app.post('/xmpp-change-password', jsonParser, function (req, res) {
  * Deletes user from virtual host
  * */
 app.post('/xmpp-unregister', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined')
 	{
@@ -273,7 +298,11 @@ app.post('/xmpp-unregister', jsonParser, function (req, res) {
  * Assigsn account to provided roaster
  * */
 app.post('/xmpp-assign-user-to-roaster', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)	
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.group !== 'undefined' && typeof req.body.grouphost !== 'undefined')
 	{	
@@ -302,6 +331,10 @@ app.post('/xmpp-assign-user-to-roaster', jsonParser, function (req, res) {
  * */
 app.post('/xmpp-delete-user-from-roaster', jsonParser, function (req, res) {
 	if (!req.body) return res.sendStatus(400)	  
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.user !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.group !== 'undefined' && typeof req.body.grouphost !== 'undefined')
 	{
@@ -332,7 +365,11 @@ app.post('/xmpp-delete-user-from-roaster', jsonParser, function (req, res) {
  * srg_create group host name description display
  * */
 app.post('/xmpp-setup-instance-roasters', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.group !== 'undefined' && typeof req.body.host !== 'undefined' && typeof req.body.name !== 'undefined' && typeof req.body.desc !== 'undefined' && typeof req.body.display !== 'undefined')
 	{
@@ -362,7 +399,11 @@ app.post('/xmpp-setup-instance-roasters', jsonParser, function (req, res) {
  * ejabberdctl  srg_delete group host
  * */
 app.post('/xmpp-delete-instance-roasters', jsonParser, function (req, res) {
-	if (!req.body) return res.sendStatus(400)	  
+	if (!req.body) return res.sendStatus(400)	
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
 	
 	if (typeof req.body.group !== 'undefined' && typeof req.body.host !== 'undefined')
 	{
@@ -387,8 +428,6 @@ app.post('/xmpp-delete-instance-roasters', jsonParser, function (req, res) {
 })
 
 
-
-
 app.post('/xmpp-testing-json', jsonParser, function (req, res) {
 	if (!req.body) return res.sendStatus(400)	
 	res.send(JSON.stringify({'status':true}));
@@ -399,9 +438,6 @@ app.post('/xmpp-testing-body', function (req, res) {
 	res.send(JSON.stringify({'status':true}));
 	console.log(req);
 })
-
-
-
 
 app.use(errorHandler({
   dumpExceptions: true,

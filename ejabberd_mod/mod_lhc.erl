@@ -68,7 +68,21 @@ on_filter_packet({From, To, XML} = Packet) ->
 			 Method = post,
 			 URL = gen_mod:get_module_opt(LServer, ?MODULE, message_address,
 		                                            fun iolist_to_binary/1,
-		                                            undefined),			 
+		                                            undefined),	
+		                                            
+		     BaseDomain = gen_mod:get_module_opt(LServer, ?MODULE, basedomain,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		                                            
+		     AHProtocol = gen_mod:get_module_opt(LServer, ?MODULE, ahprotocol,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		   
+		     AHEnviroment = gen_mod:get_module_opt(LServer, ?MODULE, ahenviroment,
+                                fun(B) when is_boolean(B) -> B end, 
+                                false),
+		                                            
+		                                            		 
 			 Header = [],
 			 TypeMessage = "application/x-www-form-urlencoded",
 			 BodyMessage = "body="++erlang:binary_to_list(ejabberd_http:url_encode(xml:get_tag_cdata(Body)))++
@@ -77,7 +91,15 @@ on_filter_packet({From, To, XML} = Packet) ->
 			 "&server="++erlang:binary_to_list(ejabberd_http:url_encode(LServer)),
 			 HTTPOptions = [],
 			 Options = [],
-			 httpc:request(Method, {erlang:binary_to_list(URL), Header, TypeMessage, BodyMessage}, HTTPOptions, Options);
+			 
+			 case AHEnviroment of
+			    true -> 
+			       [UserJID|_] = string:tokens(erlang:binary_to_list(LUser),"@"), 
+			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/processmessage", Header, TypeMessage, BodyMessage}, HTTPOptions, Options);     
+			    false -> 
+			       httpc:request(Method, {erlang:binary_to_list(URL), Header, TypeMessage, BodyMessage}, HTTPOptions, Options)
+		     end;
+		   		   			 
 	    	 %% ?INFO_MSG("Need store body",[BodyMessage,LUser]);
 	    true ->
 		    false
@@ -99,12 +121,34 @@ on_set(User, Server, _Resource, _Packet) ->
 		   URL = gen_mod:get_module_opt(LServer, ?MODULE, login_address,
 		                                            fun iolist_to_binary/1,
 		                                            undefined),
+		                                            
+		   BaseDomain = gen_mod:get_module_opt(LServer, ?MODULE, basedomain,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		                                            
+		   AHProtocol = gen_mod:get_module_opt(LServer, ?MODULE, ahprotocol,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		   
+		   AHEnviroment = gen_mod:get_module_opt(LServer, ?MODULE, ahenviroment,
+                                fun(B) when is_boolean(B) -> B end, 
+                                false),
+			
 		   Header = [],
 		   Type = "application/json",
 		   Body = "{\"action\":\"connect\",\"user\":\""++erlang:binary_to_list(LUser)++"\",\"server\":\""++erlang:binary_to_list(LServer)++"\"}",   
 		   HTTPOptions = [],
 		   Options = [],
-		   httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
+		   
+		   case AHEnviroment of
+			    true -> 
+			       [UserJID|_] = string:tokens(erlang:binary_to_list(LUser),"@"), 
+			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);      
+			       %% ?INFO_MSG("Automated hosting enviroment",["Automated"]);
+			    false -> 
+			       httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
+		   end
+		  
    end.
           
    %%?INFO_MSG("Presence set demo compile Request was send %p",[Body]).
@@ -121,12 +165,32 @@ on_unset(User, Server, _Resource, _Packet) ->
 	   URL = gen_mod:get_module_opt(LServer, ?MODULE, logout_address,
 	                                            fun iolist_to_binary/1,
 	                                            undefined),
+	                                            
+	   BaseDomain = gen_mod:get_module_opt(LServer, ?MODULE, basedomain,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		                                            
+	   AHProtocol = gen_mod:get_module_opt(LServer, ?MODULE, ahprotocol,
+		                                            fun iolist_to_binary/1,
+		                                            undefined),
+		   
+	   AHEnviroment = gen_mod:get_module_opt(LServer, ?MODULE, ahenviroment,
+                                fun(B) when is_boolean(B) -> B end, 
+                                false),
 	   Header = [],
 	   Type = "application/json",
 	   Body = "{\"action\":\"disconnect\",\"user\":\""++erlang:binary_to_list(LUser)++"\",\"server\":\""++erlang:binary_to_list(LServer)++"\"}",   
 	   HTTPOptions = [],
 	   Options = [],
-	   httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
+	   
+	   case AHEnviroment of
+			    true -> 
+			       [UserJID|_] = string:tokens(erlang:binary_to_list(LUser),"@"), 
+			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);      
+			       %% ?INFO_MSG("Automated hosting enviroment",["Automated"]);
+			    false -> 
+			       httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
+	   end	   
    end.
     
    %%?INFO_MSG("Presence set demo un-set %p %p", [erlang:binary_to_list(LUser),erlang:binary_to_list(LServer)]).

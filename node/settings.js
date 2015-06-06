@@ -1,15 +1,16 @@
 var settings = {}
 
 /**
- * Main address of LHC installation. At the moment not used, but will be used in automated hosting enviroment
- * */
-settings.http_address_lhc = 'livehelperchat.com';
-
-/**
  * To what address listen
  * */
-settings.listen_address = '95.85.55.134';
-//settings.listen_address = '127.0.0.1';
+settings.listen_address = '127.0.0.1';
+//settings.listen_address = '95.85.55.134';
+
+/**
+ * Secret key it has to match php extension secret key
+ * */
+settings.secret_key = '<change_me>';
+
 
 /**
  * To what port to listen
@@ -30,11 +31,12 @@ settings.ejabberdctl = '/opt/ejabberd-15.04/bin/ejabberdctl'
  * */
 settings.online_timeout = 300000;
 
+
 settings.debug = {};
 
 /**
  * Enable debug output
  * */
-settings.debug.output = true;
+settings.debug.output = false;
 
 module.exports = settings;
