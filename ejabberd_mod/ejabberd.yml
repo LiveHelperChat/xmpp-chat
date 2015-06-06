@@ -1,15 +1,53 @@
+Recommended/Required changes to ejabberd config
+
+1. Make sure you have copied mod_lhc.beam and mod_lhcping.beam to E.g /opt/ejabberd-15.04/lib/ejabberd-15.04/ebin folder
+
+-=STANDALONE=-
+Config example for standalone enviroment. Change address to your lhc installation
+
   mod_lhc: 
+    ## Used in Automated Hosting enviroment
+    ahenviroment: false
+    basedomain: "livehelperchat.com"
+    ahprotocol: "http://"
     ## Used in standalone enviroment
-    message_address: "http://example.com/xmppservice/processmessage"
-    login_address: "http://example.com/xmppservice/operatorstatus"
-    logout_address: "http://example.com/xmppservice/operatorstatus"
+    message_address: "http://devmysql.livehelperchat.com/xmppservice/processmessage"
+    login_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
+    logout_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
   mod_lhcping:
     send_pings: true
-    ping_interval: 180
+    ping_interval: 6
     timeout_action: kill
+    ## Used in ah enviroment
+    ahenviroment: false
+    basedomain: "livehelperchat.com"
+    ahprotocol: "http://"
     ## Used in standalone enviroment
-    ping_address: "http://example.com/xmppservice/operatorstatus"
+    ping_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
+    
+-=AUTOMATED HOSTING=-
+in this enviroment message_address,login_address,logout_address,ping_address are ignored. It's constructed automatically
 
+  mod_lhc: 
+    ## Used in Automated Hosting enviroment
+    ahenviroment: true
+    basedomain: "livehelperchat.com"
+    ahprotocol: "http://"
+    ## Used in standalone enviroment
+    message_address: "http://devmysql.livehelperchat.com/xmppservice/processmessage"
+    login_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
+    logout_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
+  mod_lhcping:
+    send_pings: true
+    ping_interval: 6
+    timeout_action: kill
+    ## Used in ah enviroment
+    ahenviroment: true
+    basedomain: "livehelperchat.com"
+    ahprotocol: "http://"
+    ## Used in standalone enviroment
+    ping_address: "http://devmysql.livehelperchat.com/xmppservice/operatorstatus"
+    
 ## Disable mod_offline    
 ## mod_offline: 
 ##  access_max_user_messages: max_user_offline_messages\
