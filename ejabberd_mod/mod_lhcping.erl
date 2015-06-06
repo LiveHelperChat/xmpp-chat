@@ -70,6 +70,9 @@
 	 ping_interval = ?DEFAULT_PING_INTERVAL :: non_neg_integer(),
 	 timeout_action = none :: none | kill,
 	 ping_address,
+	 ahenviroment,
+	 basedomain,
+	 ahprotocol,
          timers = (?DICT):new() :: ?TDICT}).
 
 %%====================================================================
@@ -120,6 +123,15 @@ init([Host, Opts]) ->
     PingAddress = gen_mod:get_opt(ping_address, Opts,
                                 fun iolist_to_binary/1,
                                 undefined),
+    BaseDomain = gen_mod:get_opt(basedomain, Opts,
+                                fun iolist_to_binary/1,
+                                undefined),
+    AHProtocol = gen_mod:get_opt(ahprotocol, Opts,
+                                fun iolist_to_binary/1,
+                                undefined),
+    AHEnviroment = gen_mod:get_opt(ahenviroment, Opts,
+                                fun(B) when is_boolean(B) -> B end,
+				false),
     IQDisc = gen_mod:get_opt(iqdisc, Opts, fun gen_iq_handler:check_type/1,
                              no_queue),
     mod_disco:register_feature(Host, ?NS_PING),
@@ -142,6 +154,9 @@ init([Host, Opts]) ->
 	    ping_interval = PingInterval,
 	    timeout_action = TimeoutAction,
 	    ping_address = PingAddress,
+	    ahenviroment = AHEnviroment,
+	    basedomain = BaseDomain,
+	    ahprotocol = AHProtocol,
 	    timers = (?DICT):new()}}.
 
 terminate(_Reason, #state{host = Host}) ->
@@ -205,8 +220,16 @@ handle_info({timeout, _TRef, {ping, JID}}, State) ->
     Body = "{\"action\":\"ping\",\"user\":\""++erlang:binary_to_list(jlib:jid_to_string(JID))++"\"}",   
     HTTPOptions = [],
     Options = [],
-    httpc:request(Method, {erlang:binary_to_list(State#state.ping_address), Header, Type, Body}, HTTPOptions, Options),  
-		
+      
+    case State#state.ahenviroment of
+	    true -> 
+	       [UserJID|_] = string:tokens(erlang:binary_to_list(jlib:jid_to_string(JID)),"@"), 
+	       httpc:request(Method, {erlang:binary_to_list(State#state.ahprotocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(State#state.basedomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);       
+	       %% ?INFO_MSG("Automated hosting enviroment",[Subdomain]);
+	    false -> 
+	    httpc:request(Method, {erlang:binary_to_list(State#state.ping_address), Header, Type, Body}, HTTPOptions, Options)
+	end,
+     		
     From = jlib:make_jid(<<"">>, State#state.host, <<"">>),
     ejabberd_local:route_iq(From, JID, IQ, F),
     Timers = add_timer(JID, State#state.ping_interval,
