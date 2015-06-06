@@ -1,5 +1,9 @@
 # xmpp-chat
-This is repository for future full XMPP chat support. This is beta version of enviroment. For standalone enviroment everything is ready and should be working.
+This is repository for full XMPP chat support in Live Helper Chat. Standalone and Automated hosting enviroments are supported.
+Folders structure
+ * ejabberd_mod - contains two ejabberd mods required for chat integration
+ * node - node server used by LHC PHP extension
+ * xmppservice - LHC extenstion which have to be installed in lhc itself.
 
 ## Requirements
  * https://www.ejabberd.im/ with mod_admin_extra enabled 15.04v
