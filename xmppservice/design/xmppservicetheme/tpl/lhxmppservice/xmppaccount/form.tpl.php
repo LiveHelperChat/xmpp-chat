@@ -2,8 +2,8 @@
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Username');?></label>
         
     <div class="input-group">
-        <input type="text" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain);?>" />
-        <div class="input-group-addon">@<?php echo erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host']?></div>
+        <input type="text" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain_edit);?>" />
+        <div class="input-group-addon"><?php if (($ahSubdomain = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain']) != '')  : ?>.<?php echo $ahSubdomain?><?php endif;?>@<?php echo erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host']?></div>
     </div>    
 </div>
 

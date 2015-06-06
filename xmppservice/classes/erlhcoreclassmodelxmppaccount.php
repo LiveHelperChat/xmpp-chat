@@ -51,7 +51,19 @@ class erLhcoreClassModelXMPPAccount
         erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.removeaccount',array('account' => & $this));
         erLhcoreClassExtensionXmppservice::getSession()->delete($this);
     }
-  
+    
+    function str_lreplace($search, $replace, $subject)
+    {
+        $pos = strrpos($subject, $search);
+    
+        if($pos !== false)
+        {
+            $subject = substr_replace($subject, $replace, $pos, strlen($search));
+        }
+    
+        return $subject;
+    }
+    
     public function __get($var)
     {
         switch ($var) {
@@ -79,8 +91,19 @@ class erLhcoreClassModelXMPPAccount
                 break;
             
             case 'username_plain':
-                list($this->username_plain) = explode('@', $this->username);                                
+                list($this->username_plain) = explode('@', $this->username);                              
                 return $this->username_plain;
+                break;
+            
+            case 'username_plain_edit':
+                list($this->username_plain_edit) = explode('@', $this->username); 
+                $subdomain = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
+                
+                if ($subdomain != '') {
+                    $this->username_plain_edit = $this->str_lreplace('.'.$subdomain, '', $this->username_plain_edit);
+                }
+                
+                return $this->username_plain_edit;
                 break;
             
             default:

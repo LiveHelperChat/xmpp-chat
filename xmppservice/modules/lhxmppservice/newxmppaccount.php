@@ -1,5 +1,10 @@
 <?php 
 
+if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['enabled'] == false) {
+    erLhcoreClassModule::redirect('/');
+    exit ;
+}
+
 $tpl = erLhcoreClassTemplate::getInstance('lhxmppservice/newxmppaccount.tpl.php');
 
 $xmppaccount = new erLhcoreClassModelXMPPAccount();
