@@ -56,6 +56,11 @@ class erLhcoreClassExtensionXmppservice
             $this,
             'instanceDestroyed'
         ));        
+        
+        $dispatcher->listen('instance.extensions_structure', array(
+            $this,
+            'checkStructure'
+        ));        
     }
 
     /**
@@ -68,6 +73,21 @@ class erLhcoreClassExtensionXmppservice
             'xmpp_host' => $this->settings['xmpp_host'],
             'node_api_server' => $this->settings['node_api_server']
         ));
+    }
+    
+    public function checkStructure()
+    {
+        // Just do table updates
+        erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'),true));
+        
+        // Shared roasters for standalone enviroment have to be created manually
+        if ($this->settings['ahosting'] == true) {
+            erLhcoreClassExtensionXmppserviceHandler::checkSharedRoasters(array(
+                'subdomain' => $this->settings['subdomain'],
+                'xmpp_host' => $this->settings['xmpp_host'],
+                'node_api_server' => $this->settings['node_api_server']
+            ));
+        }
     }
     
     /**
