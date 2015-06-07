@@ -2,14 +2,14 @@
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Username');?></label>
         
     <div class="input-group">
-        <input type="text" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain_edit);?>" />
+        <input type="text" maxlength="250" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain_edit);?>" />
         <div class="input-group-addon"><?php if (($ahSubdomain = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain']) != '')  : ?>.<?php echo $ahSubdomain?><?php endif;?>@<?php echo erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host']?></div>
     </div>    
 </div>
 
 <div class="form-group">
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Password, enter only if you are creating new user. In most cases system does not need it.');?></label>
-    <input type="text" class="form-control" name="password"  value="" />
+    <input type="text" maxlength="250" class="form-control" name="password"  value="" />
 </div>
 
 <div class="form-group">

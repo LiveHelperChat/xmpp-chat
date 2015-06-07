@@ -632,7 +632,71 @@ class erLhcoreClassExtensionXmppserviceHandler
         // Cleanup is made then new account is created
         self::cleanupOldXMPPAccounts();
     }
-
+    
+    /**
+     * Checks that instance of shared roaster existed
+     */
+    public static function checkSharedRoasters($params)
+    {
+        // Delete visitors shared roaster
+        $data[] = array(
+            "group" => "visitors.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+        );
+        
+        $data[] = array(
+            "group" => "operators.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+        );
+        
+        // First register visitors shared roaster
+        $dataRegister["visitors.".$params['subdomain']] = array(
+            "group" => "visitors.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+            "name" => "Visitors",
+            "desc" => "Visitors",
+            "display" => '\"\"'
+        );
+        
+        // Register operators shared roaster
+        $dataRegister["operators.".$params['subdomain']] = array(
+            "group" => "operators.".$params['subdomain'],
+            "host" => $params['xmpp_host'],
+            "name" => "Operators",
+            "desc" => "Operators",
+            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"'
+        );
+        
+        // Iterates through groups and checks des it exists, if not creates
+        foreach ($data as $groupData)
+        {            
+            try {
+                $response = self::sendRequest($params['node_api_server'] . '/xmpp-does-shared-roaster-exists', $groupData);
+        
+                if ($response['error'] == true) {                    
+                     try {
+                        $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $dataRegister[$groupData['group']]);
+                    
+                        if ($response['error'] == true) {
+                            throw new Exception($response['msg']);
+                        }
+                        
+                    } catch (Exception $e) {
+                        throw $e;
+                    }                    
+                }                
+                
+            } catch (Exception $e) {
+                if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                    erLhcoreClassLog::write(print_r($e, true));
+                }
+                        
+                throw $e;
+            }
+        }
+    }
+    
+    
     /**
      * Get's called then instance is destroyed
      * 
