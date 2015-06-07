@@ -402,8 +402,8 @@ app.post('/xmpp-delete-instance-roasters', jsonParser, function (req, res) {
 	if (!req.body) return res.sendStatus(400)	
 	
 	if (config.secret_key != req.body.secret_key) {
-		  return res.sendStatus(403)
-    }
+		return res.sendStatus(403)
+	}
 	
 	if (typeof req.body.group !== 'undefined' && typeof req.body.host !== 'undefined')
 	{
@@ -414,6 +414,38 @@ app.post('/xmpp-delete-instance-roasters', jsonParser, function (req, res) {
 			}
 			
 			if (error !== null) {
+				var response = {'error':true,'msg':stderr+stdout};
+			} else {
+				var response = {'error':false,'msg':stdout};
+			}
+			
+			res.send(JSON.stringify(response));
+		}); 
+	} else {
+		var response = {'error':true,'msg':'Invalid arguments'};
+		res.send(JSON.stringify(response));
+	}
+})
+
+/**
+ * Used to check does shared roaster exists.
+ * */
+app.post('/xmpp-does-shared-roaster-exists', jsonParser, function (req, res) {
+	if (!req.body) return res.sendStatus(400)	
+	
+	if (config.secret_key != req.body.secret_key) {
+		  return res.sendStatus(403)
+    }
+	
+	if (typeof req.body.group !== 'undefined' && typeof req.body.host !== 'undefined')
+	{
+		child = exec(config.ejabberdctl + " srg_get_info " + escapeShell(req.body.group) + " " + escapeShell(req.body.host), function (error, stdout, stderr) {
+			if (config.debug.output == true) {
+				console.log('stdout: ' + stdout);
+				console.log('stderr: ' + stderr);
+			}
+			
+			if (error !== null || stdout == '') {
 				var response = {'error':true,'msg':stderr+stdout};
 			} else {
 				var response = {'error':false,'msg':stdout};
