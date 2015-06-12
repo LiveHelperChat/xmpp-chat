@@ -69,7 +69,7 @@ class erLhcoreClassExtensionXmppservice
     public function instanceCreated($params)
     {
         erLhcoreClassExtensionXmppserviceHandler::registerInstanceRoasters(array(
-            'subdomain' => $params['instance']->address,  
+            'subdomain' => str_replace('.', '-', $params['instance']->address),  
             'xmpp_host' => $this->settings['xmpp_host'],
             'node_api_server' => $this->settings['node_api_server']
         ));
@@ -102,7 +102,7 @@ class erLhcoreClassExtensionXmppservice
         
         // Remove shared roasters
         erLhcoreClassExtensionXmppserviceHandler::instanceDestroyed(array(
-            'subdomain' => $params['instance']->address,
+            'subdomain' => str_replace('.', '-', $params['instance']->address),
             'xmpp_host' => $this->settings['xmpp_host'],
             'node_api_server' => $this->settings['node_api_server']
         ));
@@ -380,6 +380,7 @@ class erLhcoreClassExtensionXmppservice
      */
     public function onlineUserCreated($params)
     {
+            
         if ($this->settings['enabled'] == true && $this->settings['online_visitors_tracking'] == true) {
             
             // Append automated hosting subdomain if required
@@ -446,7 +447,7 @@ class erLhcoreClassExtensionXmppservice
             case 'settings':
                 $this->settings = include ('extension/xmppservice/settings/settings.ini.php');
                 if ($this->settings['ahosting'] == true) {
-                    $this->settings['subdomain'] = erLhcoreClassInstance::getInstance()->address;
+                    $this->settings['subdomain'] = str_replace('.', '-', erLhcoreClassInstance::getInstance()->address);
                     $this->settings['enabled'] = erLhcoreClassInstance::getInstance()->full_xmpp_chat_supported == 1;
                     $this->settings['online_visitors_tracking'] = erLhcoreClassInstance::getInstance()->full_xmpp_visitors_tracking == 1;
                 }
