@@ -269,7 +269,13 @@ class erLhcoreClassExtensionXmppserviceHandler
     {
         $xmppAccount = $params['xmpp_account'];
         
-        $paramsOnlineUser = self::getNickAndStatusByChat($params['chat']);
+        $page = '';
+        
+        if ($params['chat']->online_user !== false) {
+            $page = $params['chat']->online_user->current_page;
+        }
+        
+        $paramsOnlineUser = self::getNickAndStatusByChat($params['chat'], $page);
         
         if ($params['chat']->user_id > 0) {
             
