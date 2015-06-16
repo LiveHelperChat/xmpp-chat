@@ -224,7 +224,7 @@ handle_info({timeout, _TRef, {ping, JID}}, State) ->
     case State#state.ahenviroment of
 	    true -> 
 	       [UserJID|_] = string:tokens(erlang:binary_to_list(jlib:jid_to_string(JID)),"@"), 
-	       httpc:request(Method, {erlang:binary_to_list(State#state.ahprotocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(State#state.basedomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);       
+	       httpc:request(Method, {erlang:binary_to_list(State#state.ahprotocol)++ re:replace(lists:last(string:tokens(UserJID,".")),"-",".",[{return,list}]) ++ "." ++ erlang:binary_to_list(State#state.basedomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);       
 	       %% ?INFO_MSG("Automated hosting enviroment",[Subdomain]);
 	    false -> 
 	    httpc:request(Method, {erlang:binary_to_list(State#state.ping_address), Header, Type, Body}, HTTPOptions, Options)

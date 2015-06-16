@@ -95,7 +95,7 @@ on_filter_packet({From, To, XML} = Packet) ->
 			 case AHEnviroment of
 			    true -> 
 			       [UserJID|_] = string:tokens(erlang:binary_to_list(LUser),"@"), 
-			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/processmessage", Header, TypeMessage, BodyMessage}, HTTPOptions, Options);     
+			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ re:replace(lists:last(string:tokens(UserJID,".")),"-",".",[{return,list}]) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/processmessage", Header, TypeMessage, BodyMessage}, HTTPOptions, Options);     
 			    false -> 
 			       httpc:request(Method, {erlang:binary_to_list(URL), Header, TypeMessage, BodyMessage}, HTTPOptions, Options)
 		     end;
@@ -143,7 +143,7 @@ on_set(User, Server, _Resource, _Packet) ->
 		   case AHEnviroment of
 			    true -> 
 			       [UserJID|_] = string:tokens(erlang:binary_to_list(LUser),"@"), 
-			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);      
+			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ re:replace(lists:last(string:tokens(UserJID,".")),"-",".",[{return,list}]) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);      
 			       %% ?INFO_MSG("Automated hosting enviroment",["Automated"]);
 			    false -> 
 			       httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
@@ -186,7 +186,7 @@ on_unset(User, Server, _Resource, _Packet) ->
 	   case AHEnviroment of
 			    true -> 
 			       [UserJID|_] = string:tokens(erlang:binary_to_list(LUser),"@"), 
-			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ lists:last(string:tokens(UserJID,".")) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);      
+			       httpc:request(Method, {erlang:binary_to_list(AHProtocol)++ re:replace(lists:last(string:tokens(UserJID,".")),"-",".",[{return,list}]) ++ "." ++ erlang:binary_to_list(BaseDomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);      
 			       %% ?INFO_MSG("Automated hosting enviroment",["Automated"]);
 			    false -> 
 			       httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
