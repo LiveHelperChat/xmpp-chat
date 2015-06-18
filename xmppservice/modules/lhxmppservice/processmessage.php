@@ -27,8 +27,10 @@ try {
     if (!empty($params['body']) && !empty($params['sender']) && !empty($params['receiver']) && !empty($params['server'])) {
     	erLhcoreClassExtensionXmppserviceHandler::handleMessageFromOperator($params);
     }
-} catch (Exception $e) {    
-    erLhcoreClassLog::write(print_r($e,true));
+} catch (Exception $e) {   
+    if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) { 
+        erLhcoreClassLog::write(print_r($e,true));
+    }
 }
 exit;
 ?>

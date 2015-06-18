@@ -5,7 +5,13 @@ if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice
 }
 
 $content = file_get_contents("php://input");
-erLhcoreClassExtensionXmppserviceHandler::handleOperatorPing($content);
+try {
+    erLhcoreClassExtensionXmppserviceHandler::handleOperatorPing($content);
+} catch (Exception $e) {
+    if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+        erLhcoreClassLog::write(print_r($e,true));
+    }
+}
 exit;
 
 ?>
