@@ -55,30 +55,35 @@ class erLhcoreClassExtensionXmppservice
         $dispatcher->listen('instance.destroyed', array(
             $this,
             'instanceDestroyed'
-        ));        
+        ));
         
         $dispatcher->listen('instance.extensions_structure', array(
             $this,
             'checkStructure'
-        ));        
+        ));
+        
+        $dispatcher->listen('chat.messages_added_passive', array(
+            $this,
+            'passiveMessage'
+        ));
     }
 
     /**
      * Used only in automated hosting enviroment
-     * */
+     */
     public function instanceCreated($params)
     {
         erLhcoreClassExtensionXmppserviceHandler::registerInstanceRoasters(array(
-            'subdomain' => str_replace('.', '-', $params['instance']->address),  
+            'subdomain' => str_replace('.', '-', $params['instance']->address),
             'xmpp_host' => $this->settings['xmpp_host'],
             'node_api_server' => $this->settings['node_api_server']
         ));
     }
-    
+
     public function checkStructure()
     {
         // Just do table updates
-        erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'),true));
+        erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'), true));
         
         // Shared roasters for standalone enviroment have to be created manually
         if ($this->settings['ahosting'] == true) {
@@ -89,14 +94,16 @@ class erLhcoreClassExtensionXmppservice
             ));
         }
     }
-    
+
     /**
      * Used then instance is destroyed
-     * */
+     */
     public function instanceDestroyed($params)
     {
         // Remove users
-        foreach (erLhcoreClassModelXMPPAccount::getList(array('limit' => 1000000)) as $user) {
+        foreach (erLhcoreClassModelXMPPAccount::getList(array(
+            'limit' => 1000000
+        )) as $user) {
             $user->removeThis();
         }
         
@@ -107,7 +114,7 @@ class erLhcoreClassExtensionXmppservice
             'node_api_server' => $this->settings['node_api_server']
         ));
     }
-    
+
     public function deleteXMPPUser($params)
     {
         erLhcoreClassExtensionXmppserviceHandler::deleteXMPPUser(array(
@@ -134,7 +141,7 @@ class erLhcoreClassExtensionXmppservice
 
     public function sendMessageToOperatorAsUserByChat($params)
     {
-        if ($this->settings['enabled'] == true) {
+        if ($this->settings['enabled'] == true && isset($params['chat']) && isset($params['msg'])) {
             $chat = $params['chat'];
             
             $xmppAccount = false;
@@ -173,6 +180,28 @@ class erLhcoreClassExtensionXmppservice
                     'msg' => $params['msg'],
                     'chat' => $chat
                 ));
+            }
+        }
+    }
+
+    public function passiveMessage($params)
+    {
+        if ($this->settings['enabled'] == true) {
+            // Send message if XMPP account was active in the past 300 seconds
+            $xmppOperator = erLhcoreClassModelXMPPAccount::findOne(array(
+                'filtergt' => array(
+                    'lactivity' => time() - 300
+                ),
+                'filter' => array(
+                    'user_id' => $params['chat']->user_id,
+                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR
+                )
+            ));
+            
+            if ($xmppOperator !== false) {
+                $params['xmpp_account_operator'] = $xmppOperator;
+                $params['msg'] = erLhcoreClassBBCode::parseForMail($params['msg']->msg);
+                $this->sendMessageToOperatorAsUserByChat($params);
             }
         }
     }
@@ -380,7 +409,6 @@ class erLhcoreClassExtensionXmppservice
      */
     public function onlineUserCreated($params)
     {
-            
         if ($this->settings['enabled'] == true && $this->settings['online_visitors_tracking'] == true) {
             
             // Append automated hosting subdomain if required
@@ -411,7 +439,6 @@ class erLhcoreClassExtensionXmppservice
                 'xmppaccount' => $xmppAccount,
                 'ou' => $params['ou']
             ));
-            
         }
     }
 

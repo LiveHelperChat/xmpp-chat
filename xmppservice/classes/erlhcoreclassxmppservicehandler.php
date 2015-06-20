@@ -791,20 +791,40 @@ class erLhcoreClassExtensionXmppserviceHandler
      *
      * @throws Exception
      */
-    public static function sendMessageToChat(erLhcoreClassModelChat $chat, erLhcoreClassModelUser $user, $body)
+    public static function sendMessageToChat(erLhcoreClassModelChat $chat, erLhcoreClassModelXMPPAccount $xmppUser, $body)
     {
         $db = ezcDbInstance::get();
         $db->beginTransaction();
         
         try {
+            
+            $user = $xmppUser->user;
+            
+            $messageUserId = $user->id;
+
+            // Predefine
+            $statusCommand = array (
+                'processed' => false,
+                'process_status' => '',
+            );
+            
+            if (strpos(trim($body), '!') === 0) {
+                
+                $statusCommand = erLhcoreClassChatCommand::processCommand(array('no_ui_update' => true, 'msg' => $body, 'chat' => & $chat));
+                if ($statusCommand['processed'] === true) {
+                    $messageUserId = -1; // Message was processed set as internal message
+                    $body =  '[b]'.$userData->name_support.'[/b]: '.$body . $statusCommand['process_status'];
+                }               
+            }
+   
             $msg = new erLhcoreClassModelmsg();
             $msg->msg = $body;
             $msg->chat_id = $chat->id;
-            $msg->user_id = $user->id;
+            $msg->user_id = $messageUserId;
             $msg->time = time();
             $msg->name_support = $user->name_support;
             
-            if ($chat->chat_locale != '' && $chat->chat_locale_to != '') {
+            if ($messageUserId > 0 && $chat->chat_locale != '' && $chat->chat_locale_to != '') {
                 erLhcoreClassTranslate::translateChatMsgOperator($chat, $msg);
             }
             
@@ -861,6 +881,16 @@ class erLhcoreClassExtensionXmppserviceHandler
             
             $db->commit();
             
+            // Inform operator about command status
+            if ($statusCommand['processed'] == true) {
+                $xmppService = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice');
+                $xmppService->sendMessageToOperatorAsUserByChat(array(
+                    'xmpp_account_operator' => $xmppUser,
+                    'chat' => $chat,
+                    'msg' => '[[System Assistant]] ' . $statusCommand['process_status']
+                ));
+            }
+            
             // For nodejs plugin
             erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.desktop_client_admin_msg', array(
                 'msg' => & $msg,
@@ -916,7 +946,7 @@ class erLhcoreClassExtensionXmppserviceHandler
                         
                         // Messages to chat is only send if chat is not accepted or sender is chat owner
                         if ($chat->user_id == $user->id || $chat->user_id == 0) {
-                            self::sendMessageToChat($chat, $user, $params['body']);
+                            self::sendMessageToChat($chat, $xmppUser, $params['body']);
                         } else {
                             $xmppService = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice');
                             $xmppService->sendMessageToOperatorAsUserByChat(array(
@@ -944,7 +974,7 @@ class erLhcoreClassExtensionXmppserviceHandler
                             // We have active chat
                         } else {
                             
-                            self::sendMessageToChat($visitor->chat, $xmppUser->user, $params['body']);
+                            self::sendMessageToChat($visitor->chat, $xmppUser, $params['body']);
                         }
                     }
                 } else {
