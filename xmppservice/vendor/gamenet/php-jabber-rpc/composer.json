@@ -1,0 +1,29 @@
+{
+    "name": "gamenet/php-jabber-rpc",
+    "type": "library",
+    "description": "PHP wrapper for ejabberd xml-rpc module",
+    "keywords": ["xmpp", "jabber", "ejabberd", "xml-rpc", "xml", "rpc", "wrapper"],
+    "homepage": "https://github.com/gamenet/php-jabber-rpc",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vadim Sabirov",
+            "email": "pr0head@gmail.com"
+        },
+        {
+            "name": "Nikolay Bondarenko",
+            "email": "misterionkell@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=4.0.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "GameNet": "lib/"
+        }
+    }
+}

@@ -9,6 +9,14 @@ return array(
     'xmpp_host' => '<xmpp_host>',               // E.g xmpp.livehelperchat.com
     'node_api_server' => '<node_http_address>', // E.g http://127.0.0.1:4567',
     'host_login' => 'localhost',                // Host where node server should login as user
+    
+    // Handler, either rpc either node
+    'handler' => 'rpc',
+    
+    // RPC server settings
+    'rpc_server' => 'http://95.85.55.134:4560',                // Host where node server should login as user
+    
+    // Debug settings
     'debug' => false,                            // Write exceptions in cache/default.log use it for debuging purposes
 );
 

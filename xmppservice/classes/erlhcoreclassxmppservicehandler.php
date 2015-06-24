@@ -543,18 +543,31 @@ class erLhcoreClassExtensionXmppserviceHandler
      */
     public static function registerOperator($params = array())
     {
-        $data = array(
-            "user" => $params['xmpp_account']->username_plain,
-            "host" => $params['xmpp_host'],
-            "password" => $params['xmpp_account']->password
-        );
-        
-        try {
-            $response = self::sendRequest($params['node_api_server'] . '/xmpp-register', $data);
-            
-            if ($response['error'] == true) {
-                throw new Exception($response['msg']);
+        try {                        
+            if ($params['handler'] == 'rpc') {
+                
+                $rpc = new \GameNet\Jabber\RpcClient([
+                    'server' => $params['rpc_server'],
+                    'host' => $params['xmpp_host']
+                ]);
+                
+                $rpc->createUser($params['xmpp_account']->username_plain,  $params['xmpp_account']->password);
+                
+            } else {
+                
+                $data = array(
+                    "user" => $params['xmpp_account']->username_plain,
+                    "host" => $params['xmpp_host'],
+                    "password" => $params['xmpp_account']->password
+                );
+                
+                $response = self::sendRequest($params['node_api_server'] . '/xmpp-register', $data);
+                
+                if ($response['error'] == true) {
+                    throw new Exception($response['msg']);
+                }
             }
+            
         } catch (Exception $e) {
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                 erLhcoreClassLog::write(print_r($e, true));
@@ -563,8 +576,9 @@ class erLhcoreClassExtensionXmppserviceHandler
             throw new Exception('Could not register operator in XMPP server!');
         }
         
+        
         // Append automated hosting subdomain if required
-        $subdomainUser = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
+        /* $subdomainUser = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
         if ($subdomainUser != '') {
             $subdomainUser = '.' . $subdomainUser;
         }
@@ -589,7 +603,7 @@ class erLhcoreClassExtensionXmppserviceHandler
             }
             
             throw new Exception('Could not assign operator to operators shared roaster!');
-        }
+        } */
     }
 
     /**

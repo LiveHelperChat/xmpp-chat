@@ -1,3 +1,5 @@
 node/node_modules
 ejabberd_mod/compile.sh
 xmppservice/settings/settings.ini.php
+xmppservice/composer.lock
+xmppservice/composer.phar

@@ -341,7 +341,9 @@ class erLhcoreClassExtensionXmppservice
                 'xmpp_account' => $xmppAccount,
                 'xmpp_host' => $this->settings['xmpp_host'],
                 'host_login' => $this->settings['host_login'],
-                'node_api_server' => $this->settings['node_api_server']
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server']
             ));
         }
     }
@@ -489,6 +491,8 @@ class erLhcoreClassExtensionXmppservice
 
     public function registerAutoload()
     {
+        include 'extension/xmppservice/vendor/autoload.php';
+       
         spl_autoload_register(array(
             $this,
             'autoload'
