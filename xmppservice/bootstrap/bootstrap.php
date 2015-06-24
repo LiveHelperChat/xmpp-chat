@@ -76,7 +76,9 @@ class erLhcoreClassExtensionXmppservice
         erLhcoreClassExtensionXmppserviceHandler::registerInstanceRoasters(array(
             'subdomain' => str_replace('.', '-', $params['instance']->address),
             'xmpp_host' => $this->settings['xmpp_host'],
-            'node_api_server' => $this->settings['node_api_server']
+            'node_api_server' => $this->settings['node_api_server'],
+            'handler' => $this->settings['handler'],
+            'rpc_server' => $this->settings['rpc_server']
         ));
     }
 
@@ -85,12 +87,14 @@ class erLhcoreClassExtensionXmppservice
         // Just do table updates
         erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'), true));
         
-        // Shared roasters for standalone enviroment have to be created manually
+        // Shared rosters for standalone enviroment have to be created manually
         if ($this->settings['ahosting'] == true) {
             erLhcoreClassExtensionXmppserviceHandler::checkSharedRoasters(array(
                 'subdomain' => $this->settings['subdomain'],
                 'xmpp_host' => $this->settings['xmpp_host'],
-                'node_api_server' => $this->settings['node_api_server']
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server']
             ));
         }
     }
@@ -111,7 +115,9 @@ class erLhcoreClassExtensionXmppservice
         erLhcoreClassExtensionXmppserviceHandler::instanceDestroyed(array(
             'subdomain' => str_replace('.', '-', $params['instance']->address),
             'xmpp_host' => $this->settings['xmpp_host'],
-            'node_api_server' => $this->settings['node_api_server']
+            'node_api_server' => $this->settings['node_api_server'],
+            'handler' => $this->settings['handler'],
+            'rpc_server' => $this->settings['rpc_server']
         ));
     }
 
@@ -121,7 +127,9 @@ class erLhcoreClassExtensionXmppservice
             'xmpp_account' => $params['account'],
             'xmpp_host' => $this->settings['xmpp_host'],
             'host_login' => $this->settings['host_login'],
-            'node_api_server' => $this->settings['node_api_server']
+            'node_api_server' => $this->settings['node_api_server'],
+            'handler' => $this->settings['handler'],
+            'rpc_server' => $this->settings['rpc_server']
         ));
     }
 
@@ -178,7 +186,9 @@ class erLhcoreClassExtensionXmppservice
                     'host_login' => $this->settings['host_login'],
                     'node_api_server' => $this->settings['node_api_server'],
                     'msg' => $params['msg'],
-                    'chat' => $chat
+                    'chat' => $chat,
+                    'handler' => $this->settings['handler'],
+                    'rpc_server' => $this->settings['rpc_server']
                 ));
             }
         }
@@ -245,7 +255,9 @@ class erLhcoreClassExtensionXmppservice
                     'host_login' => $this->settings['host_login'],
                     'node_api_server' => $this->settings['node_api_server'],
                     'chat' => $chat,
-                    'msg' => $params['msg']
+                    'msg' => $params['msg'],
+                    'handler' => $this->settings['handler'],
+                    'rpc_server' => $this->settings['rpc_server']
                 ));
             } else {
                 $params['xmpp_account'] = $xmppAccount;
@@ -289,7 +301,9 @@ class erLhcoreClassExtensionXmppservice
                         'host_login' => $this->settings['host_login'],
                         'node_api_server' => $this->settings['node_api_server'],
                         'chat' => $params['chat'],
-                        'msg' => $params['msg']
+                        'msg' => $params['msg'],
+                        'handler' => $this->settings['handler'],
+                        'rpc_server' => $this->settings['rpc_server']
                     ));
                 }
             }
@@ -322,7 +336,9 @@ class erLhcoreClassExtensionXmppservice
                 'xmpp_host' => $this->settings['xmpp_host'],
                 'chat' => $chat,
                 'host_login' => $this->settings['host_login'],
-                'node_api_server' => $this->settings['node_api_server']
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server']
             ));
             
             erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.chat_account_created', array(
@@ -360,7 +376,9 @@ class erLhcoreClassExtensionXmppservice
                 'xmpp_account' => $xmppAccount,
                 'xmpp_host' => $this->settings['xmpp_host'],
                 'host_login' => $this->settings['host_login'],
-                'node_api_server' => $this->settings['node_api_server']
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server']
             ));
         }
     }
@@ -434,7 +452,9 @@ class erLhcoreClassExtensionXmppservice
                 'xmpp_host' => $this->settings['xmpp_host'],
                 'ou' => $params['ou'],
                 'host_login' => $this->settings['host_login'],
-                'node_api_server' => $this->settings['node_api_server']
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server']
             ));
             
             erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.online_account_created', array(
@@ -463,7 +483,9 @@ class erLhcoreClassExtensionXmppservice
                     'xmpp_account' => $xmppAccount,
                     'ou' => $params['ou'],
                     'host_login' => $this->settings['host_login'],
-                    'node_api_server' => $this->settings['node_api_server']
+                    'node_api_server' => $this->settings['node_api_server'],
+                    'handler' => $this->settings['handler'],
+                    'rpc_server' => $this->settings['rpc_server']
                 ));
             }
         }
