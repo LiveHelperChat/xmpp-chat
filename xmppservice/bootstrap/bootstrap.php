@@ -147,6 +147,31 @@ class erLhcoreClassExtensionXmppservice
         }
     }
 
+    public function getXMPPAccountByChat($chat)
+    {
+        $xmppAccount = false;
+        
+        if ($chat->online_user_id > 0) {
+            $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                'filter' => array(
+                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
+                    'user_id' => $chat->online_user_id
+                )
+            ));
+        }
+        
+        if ($xmppAccount === false) {
+            $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                'filter' => array(
+                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_CHAT,
+                    'user_id' => $chat->id
+                )
+            ));
+        }
+        
+        return $xmppAccount;
+    }
+    
     public function sendMessageToOperatorAsUserByChat($params)
     {
         if ($this->settings['enabled'] == true && isset($params['chat']) && isset($params['msg'])) {
@@ -188,7 +213,8 @@ class erLhcoreClassExtensionXmppservice
                     'msg' => $params['msg'],
                     'chat' => $chat,
                     'handler' => $this->settings['handler'],
-                    'rpc_server' => $this->settings['rpc_server']
+                    'rpc_server' => $this->settings['rpc_server'],
+                    'xmpp_host' => $this->settings['xmpp_host'],
                 ));
             }
         }
@@ -257,7 +283,8 @@ class erLhcoreClassExtensionXmppservice
                     'chat' => $chat,
                     'msg' => $params['msg'],
                     'handler' => $this->settings['handler'],
-                    'rpc_server' => $this->settings['rpc_server']
+                    'rpc_server' => $this->settings['rpc_server'],
+                    'xmpp_host' => $this->settings['xmpp_host'],
                 ));
             } else {
                 $params['xmpp_account'] = $xmppAccount;
@@ -303,7 +330,8 @@ class erLhcoreClassExtensionXmppservice
                         'chat' => $params['chat'],
                         'msg' => $params['msg'],
                         'handler' => $this->settings['handler'],
-                        'rpc_server' => $this->settings['rpc_server']
+                        'rpc_server' => $this->settings['rpc_server'],
+                        'xmpp_host' => $this->settings['xmpp_host'],
                     ));
                 }
             }
@@ -445,6 +473,10 @@ class erLhcoreClassExtensionXmppservice
             $xmppAccount->user_id = $params['ou']->id;
             $xmppAccount->type = erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR;
             $xmppAccount->saveThis();
+                        
+            if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
+                $params['tpl']->set('xmppAccount', $xmppAccount);
+            }
             
             // Forward this information to NodeJS server
             erLhcoreClassExtensionXmppserviceHandler::newOnlineVisitor(array(
@@ -472,12 +504,18 @@ class erLhcoreClassExtensionXmppservice
     public function onlineUserPageViewLogged($params)
     {
         if ($this->settings['enabled'] == true && $this->settings['online_visitors_tracking'] == true) {
+                        
             if (($xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
                 'filter' => array(
                     'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
                     'user_id' => $params['ou']->id
                 )
             ))) !== false) {
+                              
+                if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
+                    $params['tpl']->set('xmppAccount', $xmppAccount);
+                }
+                                
                 // Forward this information to NodeJS server
                 erLhcoreClassExtensionXmppserviceHandler::onlineUserPageViewLogged(array(
                     'xmpp_account' => $xmppAccount,
@@ -485,8 +523,11 @@ class erLhcoreClassExtensionXmppservice
                     'host_login' => $this->settings['host_login'],
                     'node_api_server' => $this->settings['node_api_server'],
                     'handler' => $this->settings['handler'],
-                    'rpc_server' => $this->settings['rpc_server']
+                    'rpc_server' => $this->settings['rpc_server'],
+                    'xmpp_host' => $this->settings['xmpp_host'],
                 ));
+                
+                
             }
         }
     }
@@ -513,7 +554,6 @@ class erLhcoreClassExtensionXmppservice
 
     public function registerAutoload()
     {
-        include 'extension/xmppservice/vendor/autoload.php';
        
         spl_autoload_register(array(
             $this,
@@ -535,7 +575,12 @@ class erLhcoreClassExtensionXmppservice
         $classesArray = array(
             'erLhcoreClassModelXMPPAccount' => 'extension/xmppservice/classes/erlhcoreclassmodelxmppaccount.php',
             'erLhcoreClassXMPPServiceAccountValidator' => 'extension/xmppservice/classes/erlhcoreclassxmppaccountvalidator.php',
-            'erLhcoreClassExtensionXmppserviceHandler' => 'extension/xmppservice/classes/erlhcoreclassxmppservicehandler.php'
+            'erLhcoreClassExtensionXmppserviceHandler' => 'extension/xmppservice/classes/erlhcoreclassxmppservicehandler.php',
+            'GameNet\Jabber\RpcClient'                 => 'extension/xmppservice/classes/php-jabber-rpc/GameNet/Jabber/RpcClient.php',
+            'GameNet\Jabber\Mixins\UserTrait'          => 'extension/xmppservice/classes/php-jabber-rpc/GameNet/Jabber/Mixins/UserTrait.php',
+            'GameNet\Jabber\Mixins\RosterTrait'        => 'extension/xmppservice/classes/php-jabber-rpc/GameNet/Jabber/Mixins/RosterTrait.php',
+            'GameNet\Jabber\Mixins\RoomTrait'          => 'extension/xmppservice/classes/php-jabber-rpc/GameNet/Jabber/Mixins/RoomTrait.php',
+            'GameNet\Jabber\Mixins\GroupTrait'         => 'extension/xmppservice/classes/php-jabber-rpc/GameNet/Jabber/Mixins/GroupTrait.php'
         );
         
         if (key_exists($className, $classesArray)) {

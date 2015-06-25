@@ -258,7 +258,10 @@ class erLhcoreClassExtensionXmppserviceHandler
     }
 
     /**
-     * Used then visitor writes a message but chat is not accepted and we send message to all connected resposible department operators from this user with next his message.
+     * @desc Used then visitor writes a message but chat is not accepted and we send message to all connected resposible department operators from this user with next his message.
+     * 
+     * @todo add RPC support
+     * 
      * */
     public static function sendMessageByVisitorDirect($params = array())
     {
@@ -275,10 +278,22 @@ class erLhcoreClassExtensionXmppserviceHandler
         );
         
         try {
-            $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
             
-            if ($response != 'ok') {
-                throw new Exception('ok as response not received');
+            if ($params['handler'] == 'rpc') {
+            
+                $rpc = new \GameNet\Jabber\RpcClient([
+                    'server' => $params['rpc_server'],
+                    'host' => $params['xmpp_host']
+                ]);
+            
+                $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
+            
+            } else {
+                $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
+                
+                if ($response != 'ok') {
+                    throw new Exception('ok as response not received');
+                }
             }
         } catch (Exception $e) {
             
@@ -307,7 +322,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         if ($params['chat']->user_id > 0) {
             
             $xmppAccountOperator = erLhcoreClassModelXMPPAccount::findOne(array(
-                'filter' => array(
+                'filter' => array (
                     'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR,
                     'user_id' => $params['chat']->user_id
                 )
@@ -325,10 +340,22 @@ class erLhcoreClassExtensionXmppserviceHandler
                 );
                 
                 try {
-                    $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
+
+                    if ($params['handler'] == 'rpc') {
                     
-                    if ($response != 'ok') {
-                        throw new Exception('ok as response not received');
+                        $rpc = new \GameNet\Jabber\RpcClient([
+                            'server' => $params['rpc_server'],
+                            'host' => $params['xmpp_host']
+                        ]);
+                    
+                        $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
+                    
+                    } else {
+                        $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
+                        
+                        if ($response != 'ok') {
+                            throw new Exception('ok as response not received');
+                        }
                     }
                 } catch (Exception $e) {
                     if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
@@ -362,10 +389,23 @@ class erLhcoreClassExtensionXmppserviceHandler
         );
         
         try {
-            $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
             
-            if ($response != 'ok') {
-                throw new Exception('ok as response not received');
+            if ($params['handler'] == 'rpc') {
+                
+                $rpc = new \GameNet\Jabber\RpcClient([
+                    'server' => $params['rpc_server'],
+                    'host' => $params['xmpp_host']
+                ]);
+                
+                $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
+                
+            } else {
+            
+                $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
+                
+                if ($response != 'ok') {
+                    throw new Exception('ok as response not received');
+                }
             }
         } catch (Exception $e) {
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
@@ -538,7 +578,8 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc->addUserToSharedRosterGroup($data['user'], $data['group']);
                 
-            } else {            
+            } else {   
+                         
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-register-online-visitor', $data);
                 
                 if ($response['error'] == true) {
@@ -688,9 +729,9 @@ class erLhcoreClassExtensionXmppserviceHandler
     /**
      * Is executed then new online visitor account is created
      *
-     * // Tested
+     * @todo test
      *
-     * @param unknown $params            
+     * @param array $params            
      */
     public static function newOnlineVisitor($params = array())
     {
@@ -710,6 +751,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         if ($params['handler'] == 'rpc') {
             
             try {
+                
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
                     'host' => $params['xmpp_host']
@@ -758,6 +800,8 @@ class erLhcoreClassExtensionXmppserviceHandler
     
     /**
      * Checks that instance of shared roaster existed
+     * 
+     * @todo add support for RPC
      */
     public static function checkSharedRoasters($params)
     {
@@ -823,6 +867,7 @@ class erLhcoreClassExtensionXmppserviceHandler
     /**
      * Get's called then instance is destroyed
      * 
+     * @todo add support for RPC
      * */
     public static function instanceDestroyed($params)
     {
@@ -859,6 +904,9 @@ class erLhcoreClassExtensionXmppserviceHandler
         
     /**
      * Creates required shared roasters
+     * 
+     * @todo add support for RPC
+     * 
      * */
     public static function registerInstanceRoasters($params) {
         
@@ -898,7 +946,8 @@ class erLhcoreClassExtensionXmppserviceHandler
     }
     
     /**
-     * *
+     * @desc Executed in erLhcoreClassExtensionXmppserviceHandler::handleMessageFromOperator send message to user from operator.
+     * if provided message is a command to operator is send command response
      *
      * @param erLhcoreClassModelChat $chat            
      *
@@ -1107,7 +1156,7 @@ class erLhcoreClassExtensionXmppserviceHandler
 
     /**
      * Handlers requests like
-     *
+     * 
      * May 08 23:02:11 [Warning] [default] [default] {"action":"ping","user":"remdex2@xmpp.livehelperchat.com/25304460891431118632139491"}
      * May 08 23:02:14 [Warning] [default] [default] {"action":"disconnect","user":"remdex2","server":"xmpp.livehelperchat.com"}
      * May 08 23:21:52 [Warning] [default] [default] {"action":"connect","user":"remdex2","server":"xmpp.livehelperchat.com"}

@@ -149,23 +149,28 @@ trait UserTrait
     }
 
     /**
-     * Send a chat message to a local or remote bare of full JID
+     * Send a message to a local or remote bare of full JID
      *
      * @param string $fromJid
      * @param string $toJid
      * @param string $message
+     * @param string $subject = ''
+     * @param string $type = 'chat'
      */
-    public function sendMessageChat($fromJid, $toJid, $message)
+    public function sendMessageChat($fromJid, $toJid, $message, $subject = '', $type = 'chat')
     {
         $this->sendRequest(
-            'send_message_chat',
+            'send_message',
             [
+                'type' => $type,
                 'from' => $fromJid,
                 'to'   => $toJid,
+                'subject' => $subject,
                 'body' => $message
             ]
         );
     }
+    
 
     /**
      * Unregister an ejabberd user account. This mechanism should only be used for server administration or server
