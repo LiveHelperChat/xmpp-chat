@@ -2,14 +2,15 @@
 This is repository for full XMPP chat support in Live Helper Chat. Standalone and Automated hosting enviroments are supported.
 Folders structure
  * ejabberd_mod - contains two ejabberd mods required for chat integration
+ * ejabberd_xmlrpc - optional if rpc as handler is used. Recommended way.
  * node - node server used by LHC PHP extension
  * xmppservice - LHC extenstion which have to be installed in lhc itself.
 
 ## Requirements
  * https://www.ejabberd.im/ with mod_admin_extra enabled 15.04v
- * https://nodejs.org/
  * https://livehelperchat.com/
- * Advanced linux skills. This stuff is not for amateurs!!!
+ * [Optional] https://nodejs.org
+ * [Optional, but recommended] Advanced linux skills. This stuff is not for amateurs!!!
 
 ## Workflow how everything is related
 
@@ -32,17 +33,19 @@ Folders structure
 ### Visitor comes to site (node server takes care of this API)
  * LHC extension checks does passed online user has assigned XMPP user.
  * If user does not exists create xmpp account
- * To nodejs server is provided request to register XMPP account and set it as active
+
+### Optional if node as handler is used
  * Visitor status should be appeneded with online information. It should come from request to NodeJS server.
  * Visitor status should be online for 5 minutes since last page view
- 
+ * To nodejs server is provided request to register XMPP account and set it as active
+  
 ### Operator sends a message to online visitor. [mod_lhc]
  * Operator writes message to user using XMPP client.
  * Intercept message at ejabberd lhc extension and there execute callback to lhc module.
  * Mod should send messages only if sender is an operator.
  * If we find active chat [based on assigned chat_id to online visitor] we append message to chat if not we write this as invitation to chat to online visitor.
  
-### Visitor starts a chat [node]
+### Visitor starts a chat [nodejs]
  * First we check does chat has assigned online visitor id and if online visitor has a xmpp account record under it.
  * We send message to all online operator who have permission to handle user department and have associated XMPP account.
  * If chat does not have associated online visitor XMPP account we create a new account based on chat itself.

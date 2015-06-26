@@ -10,8 +10,7 @@ return array(
     
     // Debug settings
     'debug' => false,                            // Write exceptions in cache/default.log use it for debuging purposes
-    
-    
+
     // Handler, either rpc either node
     'handler' => 'rpc',
     
