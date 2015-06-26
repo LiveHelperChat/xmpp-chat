@@ -3,8 +3,8 @@ var settings = {}
 /**
  * To what address listen
  * */
-settings.listen_address = '127.0.0.1';
-//settings.listen_address = '95.85.55.134';
+//settings.listen_address = '127.0.0.1';
+settings.listen_address = '95.85.55.134';
 
 /**
  * Secret key it has to match php extension secret key

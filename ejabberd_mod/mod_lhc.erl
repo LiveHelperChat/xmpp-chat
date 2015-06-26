@@ -32,7 +32,7 @@
 -include("ejabberd_http.hrl").
 -include("jlib.hrl").
 
--export([start/2, stop/1, on_set/4, on_unset/4,on_filter_packet/1,create_message/3]).
+-export([start/2, stop/1, on_set/4, on_unset/4,on_filter_packet/1,create_message/3,process/2]).
 
 start(Host, _Opts) ->
    ejabberd_hooks:add(set_presence_hook, Host, ?MODULE, on_set, 50),
@@ -192,5 +192,17 @@ on_unset(User, Server, _Resource, _Packet) ->
 			       httpc:request(Method, {erlang:binary_to_list(URL), Header, Type, Body}, HTTPOptions, Options)
 	   end	   
    end.
+    
+  %% process any request to "/sockets"
+	process([<<"makeonline">>], _Request) ->
+		
+	    % FIXME: implementation goes here
+	    "Not implemented yet";
+	
+	%% process all remaining requests
+	process(_Page, _Request) ->
+	    % FIXME: implementation goes here	
+	    "Fallback result".
+      
     
    %%?INFO_MSG("Presence set demo un-set %p %p", [erlang:binary_to_list(LUser),erlang:binary_to_list(LServer)]).
