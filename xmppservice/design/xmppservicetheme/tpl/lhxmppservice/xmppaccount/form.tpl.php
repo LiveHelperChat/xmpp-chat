@@ -9,7 +9,7 @@
 
 <div class="form-group">
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Password, enter only if you are creating new user. In most cases system does not need it.');?></label>
-    <input type="text" maxlength="250" class="form-control" name="password"  value="" />
+    <input type="password" maxlength="250" class="form-control" name="password"  value="" />
 </div>
 
 <div class="form-group">

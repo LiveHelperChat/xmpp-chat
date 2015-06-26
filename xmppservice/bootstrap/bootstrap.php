@@ -82,6 +82,13 @@ class erLhcoreClassExtensionXmppservice
         ));
     }
 
+    /**
+     * Checks automated hosting structure
+     * 
+     * This part is executed once in manager is run this cronjob.
+     * php cron.php -s site_admin -e instance -c cron/extensions_update
+     * 
+     * */
     public function checkStructure()
     {
         // Just do table updates

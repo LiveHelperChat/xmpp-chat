@@ -833,7 +833,6 @@ class erLhcoreClassExtensionXmppserviceHandler
     /**
      * Checks that instance of shared roaster existed
      * 
-     * @todo add support for RPC
      */
     public static function checkSharedRoasters($params)
     {
@@ -854,7 +853,8 @@ class erLhcoreClassExtensionXmppserviceHandler
             "host" => $params['xmpp_host'],
             "name" => "Visitors",
             "desc" => "Visitors",
-            "display" => '\"\"'
+            "display" => '\"\"',
+            "display_array" => []
         );
         
         // Register operators shared roaster
@@ -863,27 +863,29 @@ class erLhcoreClassExtensionXmppserviceHandler
             "host" => $params['xmpp_host'],
             "name" => "Operators",
             "desc" => "Operators",
-            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"'
+            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"',
+            "display_array" => ['operators.'.$params['subdomain'],'visitors.'.$params['subdomain']]
         );
         
-        // Iterates through groups and checks des it exists, if not creates
-        foreach ($data as $groupData)
-        {            
+        if ($params['handler'] == 'rpc') {
+            
             try {
-                $response = self::sendRequest($params['node_api_server'] . '/xmpp-does-shared-roaster-exists', $groupData);
-        
-                if ($response['error'] == true) {                    
-                     try {
-                        $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $dataRegister[$groupData['group']]);
+                $rpc = new \GameNet\Jabber\RpcClient([
+                    'server' => $params['rpc_server'],
+                    'host' => $params['xmpp_host']
+                ]);
+                
+                foreach ($data as $groupData) {                
+                    $infoSharedRoaster = $rpc->getInfoSharedRosterGroup($groupData['group']);
                     
-                        if ($response['error'] == true) {
-                            throw new Exception($response['msg']);
-                        }
-                        
-                    } catch (Exception $e) {
-                        throw $e;
-                    }                    
-                }                
+                    if (empty($infoSharedRoaster)) {
+                        $rpc->createSharedRosterGroup(
+                            $dataRegister[$groupData['group']]['group'], 
+                            $dataRegister[$groupData['group']]['name'], 
+                            $dataRegister[$groupData['group']]['desc'],
+                            $dataRegister[$groupData['group']]['display_array']);                                        
+                    }
+                }
                 
             } catch (Exception $e) {
                 if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
@@ -892,6 +894,35 @@ class erLhcoreClassExtensionXmppserviceHandler
                         
                 throw $e;
             }
+            
+        } else {
+            // Iterates through groups and checks des it exists, if not creates
+            foreach ($data as $groupData)
+            {            
+                try {
+                    $response = self::sendRequest($params['node_api_server'] . '/xmpp-does-shared-roaster-exists', $groupData);
+            
+                    if ($response['error'] == true) {                    
+                         try {
+                            $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $dataRegister[$groupData['group']]);
+                        
+                            if ($response['error'] == true) {
+                                throw new Exception($response['msg']);
+                            }
+                            
+                        } catch (Exception $e) {
+                            throw $e;
+                        }                    
+                    }                
+                    
+                } catch (Exception $e) {
+                    if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                        erLhcoreClassLog::write(print_r($e, true));
+                    }
+                            
+                    throw $e;
+                }
+            }
         }
     }
     
@@ -899,7 +930,6 @@ class erLhcoreClassExtensionXmppserviceHandler
     /**
      * Get's called then instance is destroyed
      * 
-     * @todo add support for RPC
      * */
     public static function instanceDestroyed($params)
     {
@@ -916,20 +946,43 @@ class erLhcoreClassExtensionXmppserviceHandler
         
         foreach ($data as $groupData)
         {
-            try {
-                $response = self::sendRequest($params['node_api_server'] . '/xmpp-delete-instance-roasters', $groupData);
-            
-                if ($response['error'] == true) {
-                    throw new Exception($response['msg']);
-                }
-            
-            } catch (Exception $e) {
-                if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
-                    erLhcoreClassLog::write(print_r($e, true));
+            if ($params['handler'] == 'rpc') {
+                try {
+                    $rpc = new \GameNet\Jabber\RpcClient([
+                        'server' => $params['rpc_server'],
+                        'host' => $params['xmpp_host']
+                    ]);
+    
+                    foreach ($data as $groupData) {
+                        $rpc->deleteSharedRosterGroup($groupData['group']);
+                    }
+                                        
+                } catch (Exception $e) {  
+                    
+                    if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                        erLhcoreClassLog::write(print_r($e, true));
+                    }
+                    
+                    // To terminate instance termination
+                    throw $e;                
                 }
                 
-                // To terminate instance termination
-                throw $e;                
+            } else {
+                try {
+                    $response = self::sendRequest($params['node_api_server'] . '/xmpp-delete-instance-roasters', $groupData);
+                
+                    if ($response['error'] == true) {
+                        throw new Exception($response['msg']);
+                    }
+                
+                } catch (Exception $e) {
+                    if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                        erLhcoreClassLog::write(print_r($e, true));
+                    }
+                    
+                    // To terminate instance termination
+                    throw $e;                
+                }
             }
         }   
     }
@@ -1011,7 +1064,7 @@ class erLhcoreClassExtensionXmppserviceHandler
                 $statusCommand = erLhcoreClassChatCommand::processCommand(array('no_ui_update' => true, 'msg' => $body, 'chat' => & $chat));
                 if ($statusCommand['processed'] === true) {
                     $messageUserId = -1; // Message was processed set as internal message
-                    $body =  '[b]'.$userData->name_support.'[/b]: '.$body . $statusCommand['process_status'];
+                    $body = '[b]'.$userData->name_support.'[/b]: '.$body .' '. ($statusCommand['process_status'] != '' ? '|| '.$statusCommand['process_status'] : '');
                 }               
             }
    
