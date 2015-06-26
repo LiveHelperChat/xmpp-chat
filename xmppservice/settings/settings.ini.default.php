@@ -28,6 +28,9 @@ return array(
     // Host where ejabberd RPC server is running. This should be available only to LHC IP, and not available publicly. By default ejabberd listens on 4560 port
     'rpc_server' => 'http://<ip>:4560',      
     
+    // Web socket address, it can be also nginx proxy
+    'bosh_service' => 'ws://xmpp.livehelperchat.com:5280/websocket',
+    
     // Then operator writes a message we can track that event, should on this event message be synced from back office
     // This gives some real time UX, use it only if you are not using nodejs extensions, otherwise it's no point to have it enabled
     'use_notification' => false,
