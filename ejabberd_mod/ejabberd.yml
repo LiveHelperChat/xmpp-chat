@@ -2,6 +2,12 @@ Recommended/Required changes to ejabberd config
 
 1. Make sure you have copied mod_lhc.beam and mod_lhcping.beam to E.g /opt/ejabberd-15.04/lib/ejabberd-15.04/ebin folder
 
+-=If you are using rpc handler rpc module has to be activated=-
+  - 
+     port: 4560
+     module: ejabberd_xmlrpc
+
+
 -=STANDALONE=-
 Config example for standalone enviroment. Change address to your lhc installation
 
