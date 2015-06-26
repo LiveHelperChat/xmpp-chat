@@ -513,7 +513,17 @@ class erLhcoreClassExtensionXmppservice
             ))) !== false) {
                               
                 if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
-                    $params['tpl']->set('xmppAccount', $xmppAccount);
+
+                    /**
+                     * In the future then websockets will support attatch method this could be used
+                     * */
+                    /* $xmppAccount->attach_data = erLhcoreClassExtensionXmppserviceHandler::prebindSession(array(
+                        'username' => $xmppAccount->username,
+                        'password' => $xmppAccount->password,
+                        'host' => $this->settings['prebind_host'] . $xmppAccount->username_plain,
+                    )); */
+                    
+                    $params['tpl']->set('xmppAccount', $xmppAccount); 
                 }
                                 
                 // Forward this information to NodeJS server

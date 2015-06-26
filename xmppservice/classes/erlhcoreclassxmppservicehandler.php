@@ -494,6 +494,38 @@ class erLhcoreClassExtensionXmppserviceHandler
     }
 
     /**
+     * @desc
+     * 
+     * Prebind xmpp sessions, it's faster this way. At the moment it's not used because websocket does not supports attach method
+     * 
+     * */
+    public static function prebindSession($params)
+    {
+        $ch = curl_init($params['host']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_USERPWD, $params['username'].':'.$params['password']);
+        $response = curl_exec($ch);
+        
+        if ($response !== false && $response != ''){
+            
+            list($JID, $SID, $RID) = explode("\n", $response);
+            
+            return array (
+                'jid' => $JID,
+                'sid' => $SID,
+                'rid' => $RID,
+            );
+        }
+        
+        return false;
+    }
+    
+    
+    /**
      * called then online visityor does a pageview
      *
      */
