@@ -28,7 +28,10 @@ return array(
     'rpc_server' => 'http://<ip>:4560',      
     
     // Web socket address, it can be also nginx proxy
-    'bosh_service' => 'ws://xmpp.livehelperchat.com:5280/websocket',
+    // If you are using nginx proxy. Config line could look like 
+    // 'ws://'.$_SERVER['HTTP_HOST'].'/websocket'
+    // Nginx config example you can find in doc folder
+    'bosh_service' => 'ws://xmpp.example.com:5280/websocket', // ws://xmpp.livehelperchat.com:5280/websocket
     
     // Then operator writes a message we can track that event, should on this event message be synced from back office
     // This gives some real time UX, use it only if you are not using nodejs extensions, otherwise it's no point to have it enabled
