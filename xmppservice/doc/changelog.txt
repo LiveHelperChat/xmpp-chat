@@ -1,0 +1,5 @@
+Version 1.1
+Dropped hard dependency on NodeJS it can fully work without it now.
+
+Version 1.0
+Initial release
