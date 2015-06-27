@@ -1106,8 +1106,11 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 if ($chat->user_status == erLhcoreClassModelChat::USER_STATUS_CLOSED_CHAT) {
                     $chat->user_status = erLhcoreClassModelChat::USER_STATUS_PENDING_REOPEN;
-                    $visitor->reopen_chat = 1;
-                    $visitor->saveThis();
+                    
+                    if ( ($onlineuser = $chat->online_user) !== false) {
+                        $onlineuser->reopen_chat = 1;
+                        $onlineuser->saveThis();
+                    }                    
                 }
                 
                 $stmt->bindValue(':user_status', $chat->user_status, PDO::PARAM_INT);
