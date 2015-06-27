@@ -27,6 +27,12 @@ $ViewList['operators'] = array(
     'functions' => array('use_admin'),
 );
 
+$ViewList['options'] = array(
+    'params' => array(),
+    'uparams' => array(),
+    'functions' => array('use_admin'),
+);
+
 $ViewList['editoperator'] = array(
     'params' => array('id'),
     'uparams' => array(),
