@@ -466,85 +466,94 @@ class erLhcoreClassExtensionXmppservice
     {
         if ($this->settings['enabled'] == true && $this->settings['online_visitors_tracking'] == true) {
             
-            // Append automated hosting subdomain if required
-            $subdomainUser = '';
-            if ($this->settings['subdomain'] != '') {
-                $subdomainUser = '.' . $this->settings['subdomain'];
+            $onlineOptions = erLhcoreClassModelChatConfig::fetch('xmppservice_options')->data;
+            
+            if (isset($onlineOptions['track_online']) && $onlineOptions['track_online'] == true) {
+                // Append automated hosting subdomain if required
+                $subdomainUser = '';
+                if ($this->settings['subdomain'] != '') {
+                    $subdomainUser = '.' . $this->settings['subdomain'];
+                }
+                
+                // Create DB record for XMPP user
+                $xmppAccount = new erLhcoreClassModelXMPPAccount();
+                $xmppAccount->lactivity = $xmppAccount->ctime = time();
+                $xmppAccount->username = 'visitor.' . $params['ou']->id . $subdomainUser . '@' . $this->settings['xmpp_host'];
+                $xmppAccount->password = substr(md5(microtime() . rand(0, 100) . $params['ou']->vid), 0, 20);
+                $xmppAccount->user_id = $params['ou']->id;
+                $xmppAccount->type = erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR;
+                $xmppAccount->saveThis();
+                            
+                if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
+                    $params['tpl']->set('xmppAccount', $xmppAccount);
+                }
+                
+                // Forward this information to NodeJS server
+                erLhcoreClassExtensionXmppserviceHandler::newOnlineVisitor(array(
+                    'xmpp_account' => $xmppAccount,
+                    'xmpp_host' => $this->settings['xmpp_host'],
+                    'ou' => $params['ou'],
+                    'host_login' => $this->settings['host_login'],
+                    'node_api_server' => $this->settings['node_api_server'],
+                    'handler' => $this->settings['handler'],
+                    'rpc_server' => $this->settings['rpc_server']
+                ));
+                
+                erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.online_account_created', array(
+                    'xmppaccount' => $xmppAccount,
+                    'ou' => $params['ou']
+                ));
             }
-            
-            // Create DB record for XMPP user
-            $xmppAccount = new erLhcoreClassModelXMPPAccount();
-            $xmppAccount->lactivity = $xmppAccount->ctime = time();
-            $xmppAccount->username = 'visitor.' . $params['ou']->id . $subdomainUser . '@' . $this->settings['xmpp_host'];
-            $xmppAccount->password = substr(md5(microtime() . rand(0, 100) . $params['ou']->vid), 0, 20);
-            $xmppAccount->user_id = $params['ou']->id;
-            $xmppAccount->type = erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR;
-            $xmppAccount->saveThis();
-                        
-            if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
-                $params['tpl']->set('xmppAccount', $xmppAccount);
-            }
-            
-            // Forward this information to NodeJS server
-            erLhcoreClassExtensionXmppserviceHandler::newOnlineVisitor(array(
-                'xmpp_account' => $xmppAccount,
-                'xmpp_host' => $this->settings['xmpp_host'],
-                'ou' => $params['ou'],
-                'host_login' => $this->settings['host_login'],
-                'node_api_server' => $this->settings['node_api_server'],
-                'handler' => $this->settings['handler'],
-                'rpc_server' => $this->settings['rpc_server']
-            ));
-            
-            erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.online_account_created', array(
-                'xmppaccount' => $xmppAccount,
-                'ou' => $params['ou']
-            ));
         }
     }
 
     /**
      * get's callend then online user does a pageview
      *
-     * @param unknown $params            
+     * @param array $params            
      */
     public function onlineUserPageViewLogged($params)
     {
         if ($this->settings['enabled'] == true && $this->settings['online_visitors_tracking'] == true) {
-                        
-            if (($xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
-                'filter' => array(
-                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
-                    'user_id' => $params['ou']->id
-                )
-            ))) !== false) {
-                              
-                if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
 
-                    /**
-                     * In the future then websockets will support attatch method this could be used
-                     * */
-                    /* $xmppAccount->attach_data = erLhcoreClassExtensionXmppserviceHandler::prebindSession(array(
-                        'username' => $xmppAccount->username,
-                        'password' => $xmppAccount->password,
-                        'host' => $this->settings['prebind_host'] . $xmppAccount->username_plain,
-                    )); */
+            $onlineOptions = erLhcoreClassModelChatConfig::fetch('xmppservice_options')->data;
+            
+            if (isset($onlineOptions['track_online']) && $onlineOptions['track_online'] == true) {
+                           
+                if (($xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                    'filter' => array(
+                        'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
+                        'user_id' => $params['ou']->id
+                    )
+                ))) !== false) {
+                                  
+                    if ($this->settings['handler'] == 'rpc' && is_object($params['tpl']) && $this->settings['online_visitors_tracking'] == true) {
+    
+                        /**
+                         * In the future then websockets will support attatch method this could be used
+                         * */
+                        /* $xmppAccount->attach_data = erLhcoreClassExtensionXmppserviceHandler::prebindSession(array(
+                            'username' => $xmppAccount->username,
+                            'password' => $xmppAccount->password,
+                            'host' => $this->settings['prebind_host'] . $xmppAccount->username_plain,
+                        )); */
+                        
+                        $params['tpl']->set('xmppAccount', $xmppAccount); 
+                    }
+                                    
+                    // Forward this information to NodeJS server
+                    erLhcoreClassExtensionXmppserviceHandler::onlineUserPageViewLogged(array(
+                        'xmpp_account' => $xmppAccount,
+                        'ou' => $params['ou'],
+                        'host_login' => $this->settings['host_login'],
+                        'node_api_server' => $this->settings['node_api_server'],
+                        'handler' => $this->settings['handler'],
+                        'rpc_server' => $this->settings['rpc_server'],
+                        'xmpp_host' => $this->settings['xmpp_host'],
+                    ));
                     
-                    $params['tpl']->set('xmppAccount', $xmppAccount); 
+                    
                 }
-                                
-                // Forward this information to NodeJS server
-                erLhcoreClassExtensionXmppserviceHandler::onlineUserPageViewLogged(array(
-                    'xmpp_account' => $xmppAccount,
-                    'ou' => $params['ou'],
-                    'host_login' => $this->settings['host_login'],
-                    'node_api_server' => $this->settings['node_api_server'],
-                    'handler' => $this->settings['handler'],
-                    'rpc_server' => $this->settings['rpc_server'],
-                    'xmpp_host' => $this->settings['xmpp_host'],
-                ));
-                
-                
             }
         }
     }
