@@ -38,6 +38,10 @@ $Result['content'] = $tpl->fetch();
 
 $Result['path'] = array(
     array(
+        'url' => erLhcoreClassDesign::baseurl('xmppservice/index'),
+        'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/module', 'XMPP Service')
+    ),
+    array(
         'url' => erLhcoreClassDesign::baseurl('xmppservice/operators'),
         'title' => erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/module', 'XMPP Accounts')
     )
