@@ -73,16 +73,24 @@ class erLhcoreClassExtensionXmppservice
      */
     public function instanceCreated($params)
     {
-        erLhcoreClassExtensionXmppserviceHandler::registerInstanceRoasters(array(
-            'subdomain' => str_replace('.', '-', $params['instance']->address),
-            'xmpp_host' => $this->settings['xmpp_host'],
-            'node_api_server' => $this->settings['node_api_server'],
-            'handler' => $this->settings['handler'],
-            'rpc_server' => $this->settings['rpc_server'],
-            'rpc_username' => $this->settings['rpc_username'],
-            'rpc_password' => $this->settings['rpc_password'],
-            'rpc_account_host' => $this->settings['rpc_account_host']   
-        ));
+        try {
+            // Just do table updates
+            erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'), true));
+            
+            erLhcoreClassExtensionXmppserviceHandler::registerInstanceRoasters(array(
+                'subdomain' => str_replace('.', '-', $params['instance']->address),
+                'xmpp_host' => $this->settings['xmpp_host'],
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server'],
+                'rpc_username' => $this->settings['rpc_username'],
+                'rpc_password' => $this->settings['rpc_password'],
+                'rpc_account_host' => $this->settings['rpc_account_host']   
+            ));
+            
+        } catch (Exception $e) {
+            erLhcoreClassLog::write(print_r($e, true));
+        }
     }
 
     /**
@@ -117,24 +125,29 @@ class erLhcoreClassExtensionXmppservice
      */
     public function instanceDestroyed($params)
     {
-        // Remove users
-        foreach (erLhcoreClassModelXMPPAccount::getList(array(
-            'limit' => 1000000
-        )) as $user) {
-            $user->removeThis();
+        try {
+            // Remove shared roasters
+            erLhcoreClassExtensionXmppserviceHandler::instanceDestroyed(array(
+                'subdomain' => str_replace('.', '-', $params['instance']->address),
+                'xmpp_host' => $this->settings['xmpp_host'],
+                'node_api_server' => $this->settings['node_api_server'],
+                'handler' => $this->settings['handler'],
+                'rpc_server' => $this->settings['rpc_server'],
+                'rpc_username' => $this->settings['rpc_username'],
+                'rpc_password' => $this->settings['rpc_password'],
+                'rpc_account_host' => $this->settings['rpc_account_host']
+            ));
+            
+            // Remove users
+            foreach (erLhcoreClassModelXMPPAccount::getList(array(
+                'limit' => 1000000
+            )) as $user) {
+                $user->removeThis();
+            }
+            
+        } catch (Exception $e) {
+            erLhcoreClassLog::write(print_r($e, true));
         }
-        
-        // Remove shared roasters
-        erLhcoreClassExtensionXmppserviceHandler::instanceDestroyed(array(
-            'subdomain' => str_replace('.', '-', $params['instance']->address),
-            'xmpp_host' => $this->settings['xmpp_host'],
-            'node_api_server' => $this->settings['node_api_server'],
-            'handler' => $this->settings['handler'],
-            'rpc_server' => $this->settings['rpc_server'],
-            'rpc_username' => $this->settings['rpc_username'],
-            'rpc_password' => $this->settings['rpc_password'],
-            'rpc_account_host' => $this->settings['rpc_account_host']
-        ));
     }
 
     public function deleteXMPPUser($params)
