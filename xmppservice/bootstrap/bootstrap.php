@@ -245,75 +245,89 @@ class erLhcoreClassExtensionXmppservice
     public function passiveMessage($params)
     {
         if ($this->settings['enabled'] == true) {
-            // Send message if XMPP account was active in the past 300 seconds
-            $xmppOperator = erLhcoreClassModelXMPPAccount::findOne(array(
-                'filtergt' => array(
-                    'lactivity' => time() - 300
-                ),
-                'filter' => array(
-                    'user_id' => $params['chat']->user_id,
-                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR
-                )
-            ));
             
-            if ($xmppOperator !== false) {
-                $params['xmpp_account_operator'] = $xmppOperator;
-                $params['msg'] = erLhcoreClassBBCode::parseForMail($params['msg']->msg);
-                $this->sendMessageToOperatorAsUserByChat($params);
+            $onlineOptions = erLhcoreClassModelChatConfig::fetch('xmppservice_options')->data;
+            
+            if (isset($onlineOptions['xmpp_enabled']) && $onlineOptions['xmpp_enabled'] == true) {
+                // Send message if XMPP account was active in the past 300 seconds
+                $xmppOperator = erLhcoreClassModelXMPPAccount::findOne(array(
+                    'filtergt' => array(
+                        'lactivity' => time() - 300
+                    ),
+                    'filter' => array(
+                        'user_id' => $params['chat']->user_id,
+                        'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR
+                    )
+                ));
+                
+                if ($xmppOperator !== false) {
+                    $params['xmpp_account_operator'] = $xmppOperator;
+                    $params['msg'] = erLhcoreClassBBCode::parseForMail($params['msg']->msg);
+                    $this->sendMessageToOperatorAsUserByChat($params);
+                }
             }
         }
     }
 
+    /**
+     * Executed then user sends a message to operator. We just forward message to xmpp username
+     * */
     public function addMessageUser($params)
     {
         if ($this->settings['enabled'] == true) {
-            $chat = $params['chat'];
             
-            $xmppAccount = false;
+            $onlineOptions = erLhcoreClassModelChatConfig::fetch('xmppservice_options')->data;
             
-            if ($chat->online_user_id > 0) {
-                $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
-                    'filter' => array(
-                        'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
-                        'user_id' => $chat->online_user_id
-                    )
-                ));
-            }
+            if (isset($onlineOptions['xmpp_enabled']) && $onlineOptions['xmpp_enabled'] == true) {
             
-            if ($xmppAccount === false) {
-                $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
-                    'filter' => array(
-                        'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_CHAT,
-                        'user_id' => $chat->id
-                    )
-                ));
-            }
-            
-            if ($xmppAccount === false) {
-                $xmppAccount = $this->registerXMPPAccountByChat(array(
-                    'chat' => $chat
-                ));
-            }
-            
-            // We could not determine a recipient
-            if ($xmppAccount !== false && $chat->user_id > 0) {
-                // Forward this information to NodeJS server
-                erLhcoreClassExtensionXmppserviceHandler::sendMessageByVisitor(array(
-                    'xmpp_account' => $xmppAccount,
-                    'host_login' => $this->settings['host_login'],
-                    'node_api_server' => $this->settings['node_api_server'],
-                    'chat' => $chat,
-                    'msg' => $params['msg'],
-                    'handler' => $this->settings['handler'],
-                    'rpc_server' => $this->settings['rpc_server'],
-                    'rpc_username' => $this->settings['rpc_username'],
-                    'rpc_password' => $this->settings['rpc_password'],
-                    'rpc_account_host' => $this->settings['rpc_account_host'],
-                    'xmpp_host' => $this->settings['xmpp_host'],
-                ));
-            } else {
-                $params['xmpp_account'] = $xmppAccount;
-                $this->sendMessageToAllDepartmentOperators($params);
+                $chat = $params['chat'];
+                
+                $xmppAccount = false;
+                
+                if ($chat->online_user_id > 0) {
+                    $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                        'filter' => array(
+                            'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
+                            'user_id' => $chat->online_user_id
+                        )
+                    ));
+                }
+                
+                if ($xmppAccount === false) {
+                    $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                        'filter' => array(
+                            'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_CHAT,
+                            'user_id' => $chat->id
+                        )
+                    ));
+                }
+                
+                if ($xmppAccount === false) {
+                    $xmppAccount = $this->registerXMPPAccountByChat(array(
+                        'chat' => $chat
+                    ));
+                }
+                
+                // We could not determine a recipient
+                if ($xmppAccount !== false && $chat->user_id > 0) {
+                    // Forward this information to NodeJS server
+                    erLhcoreClassExtensionXmppserviceHandler::sendMessageByVisitor(array(
+                        'xmpp_account' => $xmppAccount,
+                        'host_login' => $this->settings['host_login'],
+                        'node_api_server' => $this->settings['node_api_server'],
+                        'chat' => $chat,
+                        'msg' => $params['msg'],
+                        'handler' => $this->settings['handler'],
+                        'rpc_server' => $this->settings['rpc_server'],
+                        'rpc_username' => $this->settings['rpc_username'],
+                        'rpc_password' => $this->settings['rpc_password'],
+                        'rpc_account_host' => $this->settings['rpc_account_host'],
+                        'xmpp_host' => $this->settings['xmpp_host'],
+                    ));
+                } else {
+                    $params['xmpp_account'] = $xmppAccount;
+                    $this->sendMessageToAllDepartmentOperators($params);
+                }
             }
         }
     }
@@ -461,28 +475,34 @@ class erLhcoreClassExtensionXmppservice
     public function chatStarted($params)
     {
         if ($this->settings['enabled'] == true) {
-            $xmppAccount = false;
             
-            if ($params['chat']->online_user_id > 0) {
-                $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
-                    'filter' => array(
-                        'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
-                        'user_id' => $params['chat']->online_user_id
-                    )
-                ));
+            $onlineOptions = erLhcoreClassModelChatConfig::fetch('xmppservice_options')->data;
+            
+            if (isset($onlineOptions['xmpp_enabled']) && $onlineOptions['xmpp_enabled'] == true) {
+            
+                $xmppAccount = false;
+                
+                if ($params['chat']->online_user_id > 0) {
+                    $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                        'filter' => array(
+                            'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
+                            'user_id' => $params['chat']->online_user_id
+                        )
+                    ));
+                }
+                
+                // Online user is not assigned or xmpp account does not exists
+                // So create an account based on chat
+                if ($xmppAccount === false) {
+                    $xmppAccount = $this->registerXMPPAccountByChat(array(
+                        'chat' => $params['chat']
+                    ));
+                }
+                
+                $params['xmpp_account'] = $xmppAccount;
+                
+                $this->sendMessageToAllDepartmentOperators($params);
             }
-            
-            // Online user is not assigned or xmpp account does not exists
-            // So create an account based on chat
-            if ($xmppAccount === false) {
-                $xmppAccount = $this->registerXMPPAccountByChat(array(
-                    'chat' => $params['chat']
-                ));
-            }
-            
-            $params['xmpp_account'] = $xmppAccount;
-            
-            $this->sendMessageToAllDepartmentOperators($params);
         }
     }
 
