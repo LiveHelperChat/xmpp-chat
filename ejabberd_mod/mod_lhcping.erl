@@ -62,7 +62,7 @@
 
 %% Hook callbacks
 -export([iq_ping/3, user_online/3, user_offline/3,
-	 user_send/3]).
+	 user_send/4, mod_opt_type/1]).
 
 -record(state,
 	{host = <<"">>,
@@ -263,11 +263,12 @@ user_offline(_SID, JID, _Info) ->
     stop_ping(JID#jid.lserver, JID).
 
 %% Activate pinging only to operators
-user_send(JID, _From, _Packet) ->
+user_send(Packet, _C2SState, JID, _From) ->
 	case re:run(jlib:jid_to_string(JID),"^visitor\.[0-9](.*?)") of
 	  {match, _} ->  ok;
 	  nomatch -> start_ping(JID#jid.lserver, JID)
-	end.
+	end,
+	Packet.
 
 %%====================================================================
 %% Internal functions
@@ -297,3 +298,15 @@ cancel_timer(TRef) ->
 	  receive {timeout, TRef, _} -> ok after 0 -> ok end;
       _ -> ok
     end.
+    
+mod_opt_type(iqdisc) -> fun gen_iq_handler:check_type/1;
+mod_opt_type(ping_interval) ->
+    fun (I) when is_integer(I), I > 0 -> I end;
+mod_opt_type(send_pings) ->
+    fun (B) when is_boolean(B) -> B end;
+mod_opt_type(timeout_action) ->
+    fun (none) -> none;
+	(kill) -> kill
+    end;
+mod_opt_type(_) ->
+    [iqdisc, ping_interval, send_pings, timeout_action].
