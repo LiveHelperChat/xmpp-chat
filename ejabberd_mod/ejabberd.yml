@@ -6,6 +6,13 @@ Recommended/Required changes to ejabberd config
   - 
      port: 4560
      module: ejabberd_xmlrpc
+     ## For security reasons you can force to listen only on localhost also
+     ## if you are made it public you can setup auth method for this service
+	 ## ip: "127.0.0.1"
+     ## access_commands:
+     ##  xmlrpc_access:
+     ##    commands: all
+     ##    options: {}
 
 
 -=STANDALONE=-
@@ -58,3 +65,9 @@ in this enviroment message_address,login_address,logout_address,ping_address are
 ## mod_offline: 
 ##  access_max_user_messages: max_user_offline_messages\
 ##  db_type: odbc
+
+## You can setup access only for admin user. Under this user RPC request will be called.
+access:
+  xmlrpc_access:
+    admin: allow
+    all: deny
