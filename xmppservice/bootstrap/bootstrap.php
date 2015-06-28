@@ -78,7 +78,10 @@ class erLhcoreClassExtensionXmppservice
             'xmpp_host' => $this->settings['xmpp_host'],
             'node_api_server' => $this->settings['node_api_server'],
             'handler' => $this->settings['handler'],
-            'rpc_server' => $this->settings['rpc_server']
+            'rpc_server' => $this->settings['rpc_server'],
+            'rpc_username' => $this->settings['rpc_username'],
+            'rpc_password' => $this->settings['rpc_password'],
+            'rpc_account_host' => $this->settings['rpc_account_host']   
         ));
     }
 
@@ -101,7 +104,10 @@ class erLhcoreClassExtensionXmppservice
                 'xmpp_host' => $this->settings['xmpp_host'],
                 'node_api_server' => $this->settings['node_api_server'],
                 'handler' => $this->settings['handler'],
-                'rpc_server' => $this->settings['rpc_server']
+                'rpc_server' => $this->settings['rpc_server'],
+                'rpc_username' => $this->settings['rpc_username'],
+                'rpc_password' => $this->settings['rpc_password'],
+                'rpc_account_host' => $this->settings['rpc_account_host']
             ));
         }
     }
@@ -124,7 +130,10 @@ class erLhcoreClassExtensionXmppservice
             'xmpp_host' => $this->settings['xmpp_host'],
             'node_api_server' => $this->settings['node_api_server'],
             'handler' => $this->settings['handler'],
-            'rpc_server' => $this->settings['rpc_server']
+            'rpc_server' => $this->settings['rpc_server'],
+            'rpc_username' => $this->settings['rpc_username'],
+            'rpc_password' => $this->settings['rpc_password'],
+            'rpc_account_host' => $this->settings['rpc_account_host']
         ));
     }
 
@@ -136,7 +145,10 @@ class erLhcoreClassExtensionXmppservice
             'host_login' => $this->settings['host_login'],
             'node_api_server' => $this->settings['node_api_server'],
             'handler' => $this->settings['handler'],
-            'rpc_server' => $this->settings['rpc_server']
+            'rpc_server' => $this->settings['rpc_server'],
+            'rpc_username' => $this->settings['rpc_username'],
+            'rpc_password' => $this->settings['rpc_password'],
+            'rpc_account_host' => $this->settings['rpc_account_host']
         ));
     }
 
@@ -221,6 +233,9 @@ class erLhcoreClassExtensionXmppservice
                     'chat' => $chat,
                     'handler' => $this->settings['handler'],
                     'rpc_server' => $this->settings['rpc_server'],
+                    'rpc_username' => $this->settings['rpc_username'],
+                    'rpc_password' => $this->settings['rpc_password'],
+                    'rpc_account_host' => $this->settings['rpc_account_host'],
                     'xmpp_host' => $this->settings['xmpp_host'],
                 ));
             }
@@ -291,6 +306,9 @@ class erLhcoreClassExtensionXmppservice
                     'msg' => $params['msg'],
                     'handler' => $this->settings['handler'],
                     'rpc_server' => $this->settings['rpc_server'],
+                    'rpc_username' => $this->settings['rpc_username'],
+                    'rpc_password' => $this->settings['rpc_password'],
+                    'rpc_account_host' => $this->settings['rpc_account_host'],
                     'xmpp_host' => $this->settings['xmpp_host'],
                 ));
             } else {
@@ -338,6 +356,9 @@ class erLhcoreClassExtensionXmppservice
                         'msg' => $params['msg'],
                         'handler' => $this->settings['handler'],
                         'rpc_server' => $this->settings['rpc_server'],
+                        'rpc_username' => $this->settings['rpc_username'],
+                        'rpc_password' => $this->settings['rpc_password'],
+                        'rpc_account_host' => $this->settings['rpc_account_host'],
                         'xmpp_host' => $this->settings['xmpp_host'],
                     ));
                 }
@@ -373,7 +394,10 @@ class erLhcoreClassExtensionXmppservice
                 'host_login' => $this->settings['host_login'],
                 'node_api_server' => $this->settings['node_api_server'],
                 'handler' => $this->settings['handler'],
-                'rpc_server' => $this->settings['rpc_server']
+                'rpc_server' => $this->settings['rpc_server'],
+                'rpc_username' => $this->settings['rpc_username'],
+                'rpc_password' => $this->settings['rpc_password'],
+                'rpc_account_host' => $this->settings['rpc_account_host']
             ));
             
             erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.chat_account_created', array(
@@ -394,7 +418,10 @@ class erLhcoreClassExtensionXmppservice
                 'host_login' => $this->settings['host_login'],
                 'node_api_server' => $this->settings['node_api_server'],
                 'handler' => $this->settings['handler'],
-                'rpc_server' => $this->settings['rpc_server']
+                'rpc_server' => $this->settings['rpc_server'],
+                'rpc_username' => $this->settings['rpc_username'],
+                'rpc_password' => $this->settings['rpc_password'],
+                'rpc_account_host' => $this->settings['rpc_account_host']
             ));
         }
     }
@@ -413,7 +440,10 @@ class erLhcoreClassExtensionXmppservice
                 'host_login' => $this->settings['host_login'],
                 'node_api_server' => $this->settings['node_api_server'],
                 'handler' => $this->settings['handler'],
-                'rpc_server' => $this->settings['rpc_server']
+                'rpc_server' => $this->settings['rpc_server'],
+                'rpc_username' => $this->settings['rpc_username'],
+                'rpc_password' => $this->settings['rpc_password'],
+                'rpc_account_host' => $this->settings['rpc_account_host']
             ));
         }
     }
@@ -496,7 +526,10 @@ class erLhcoreClassExtensionXmppservice
                     'host_login' => $this->settings['host_login'],
                     'node_api_server' => $this->settings['node_api_server'],
                     'handler' => $this->settings['handler'],
-                    'rpc_server' => $this->settings['rpc_server']
+                    'rpc_server' => $this->settings['rpc_server'],
+                    'rpc_username' => $this->settings['rpc_username'],
+                    'rpc_password' => $this->settings['rpc_password'],
+                    'rpc_account_host' => $this->settings['rpc_account_host']
                 ));
                 
                 erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.online_account_created', array(
@@ -540,7 +573,7 @@ class erLhcoreClassExtensionXmppservice
                         
                         $params['tpl']->set('xmppAccount', $xmppAccount); 
                     }
-                                    
+              
                     // Forward this information to NodeJS server
                     erLhcoreClassExtensionXmppserviceHandler::onlineUserPageViewLogged(array(
                         'xmpp_account' => $xmppAccount,
@@ -548,11 +581,12 @@ class erLhcoreClassExtensionXmppservice
                         'host_login' => $this->settings['host_login'],
                         'node_api_server' => $this->settings['node_api_server'],
                         'handler' => $this->settings['handler'],
-                        'rpc_server' => $this->settings['rpc_server'],
                         'xmpp_host' => $this->settings['xmpp_host'],
+                        'rpc_server' => $this->settings['rpc_server'],
+                        'rpc_username' => $this->settings['rpc_username'],
+                        'rpc_password' => $this->settings['rpc_password'],
+                        'rpc_account_host' => $this->settings['rpc_account_host']                        
                     ));
-                    
-                    
                 }
             }
         }

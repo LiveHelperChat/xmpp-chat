@@ -199,7 +199,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                             
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
             
                 $rpc->deleteUserSharedRosterGroup($data['user'],  $data['group']);
@@ -234,7 +237,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
                 
                 $rpc->unregisterUser($data['user']);
@@ -283,7 +289,10 @@ class erLhcoreClassExtensionXmppserviceHandler
             
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
             
                 $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
@@ -345,7 +354,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                     
                         $rpc = new \GameNet\Jabber\RpcClient([
                             'server' => $params['rpc_server'],
-                            'host' => $params['xmpp_host']
+                            'host' => $params['xmpp_host'],
+                            'account_host' => $params['rpc_account_host'],
+                            'username' => $params['rpc_username'],
+                            'password' => $params['rpc_password']
                         ]);
                     
                         $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
@@ -394,7 +406,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
                 
                 $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
@@ -603,8 +618,12 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],                    
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
+                
                 
                 $rpc->createUser($data['user'], $data['password']);
                 
@@ -650,7 +669,10 @@ class erLhcoreClassExtensionXmppserviceHandler
             
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
             
                 $rpc->changePassword($data['user'],  $data['password']);
@@ -684,7 +706,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
                 
                 $rpc->createUser($params['xmpp_account']->username_plain,  $params['xmpp_account']->password);
@@ -724,7 +749,10 @@ class erLhcoreClassExtensionXmppserviceHandler
 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
                 
                 $rpc->addUserToSharedRosterGroup(
@@ -786,7 +814,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
                 
                 $rpc->createUser($userParts[0],  $xmppAccount->password);
@@ -872,7 +903,10 @@ class erLhcoreClassExtensionXmppserviceHandler
             try {
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host']
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
                 ]);
                 
                 foreach ($data as $groupData) {                
@@ -950,7 +984,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 try {
                     $rpc = new \GameNet\Jabber\RpcClient([
                         'server' => $params['rpc_server'],
-                        'host' => $params['xmpp_host']
+                        'host' => $params['xmpp_host'],
+                        'account_host' => $params['rpc_account_host'],
+                        'username' => $params['rpc_username'],
+                        'password' => $params['rpc_password']
                     ]);
     
                     foreach ($data as $groupData) {
@@ -1001,7 +1038,8 @@ class erLhcoreClassExtensionXmppserviceHandler
               "host" => $params['xmpp_host'],
               "name" => "Visitors",
               "desc" => "Visitors",
-              "display" => '\"\"'
+              "display" => '\"\"',
+              "display_array" => []
         );
         
         // Register operators shared roaster
@@ -1010,21 +1048,53 @@ class erLhcoreClassExtensionXmppserviceHandler
             "host" => $params['xmpp_host'],
             "name" => "Operators",
             "desc" => "Operators",
-            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"'
+            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"',
+            "display_array" => ['operators.'.$params['subdomain'],'visitors.'.$params['subdomain']]
         );
-        
-        foreach ($data as $groupData)
-        {
-            try {
-                $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $groupData);
-            
-                if ($response['error'] == true) {
-                    throw new Exception($response['msg']);
-                }
                 
+        if ($params['handler'] == 'rpc') {
+            try {
+                $rpc = new \GameNet\Jabber\RpcClient([
+                    'server' => $params['rpc_server'],
+                    'host' => $params['xmpp_host'],
+                    'account_host' => $params['rpc_account_host'],
+                    'username' => $params['rpc_username'],
+                    'password' => $params['rpc_password']
+                ]);
+            
+                foreach ($data as $groupData) {
+                    $infoSharedRoaster = $rpc->getInfoSharedRosterGroup($groupData['group']);
+            
+                    if (empty($infoSharedRoaster)) {
+                        $rpc->createSharedRosterGroup(
+                            $groupData['group'],
+                            $groupData['name'],
+                            $groupData['desc'],
+                            $groupData['display_array']);
+                    }
+                }
+            
             } catch (Exception $e) {
                 if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                     erLhcoreClassLog::write(print_r($e, true));
+                }
+            
+            }
+            
+        } else { 
+            foreach ($data as $groupData)
+            {
+                try {
+                    $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $groupData);
+                
+                    if ($response['error'] == true) {
+                        throw new Exception($response['msg']);
+                    }
+                    
+                } catch (Exception $e) {
+                    if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                        erLhcoreClassLog::write(print_r($e, true));
+                    }
                 }
             }
         }

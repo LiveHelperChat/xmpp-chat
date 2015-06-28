@@ -27,6 +27,12 @@ return array(
     // Host where ejabberd RPC server is running. This should be available only to LHC IP, and not available publicly. By default ejabberd listens on 4560 port
     'rpc_server' => 'http://<ip>:4560',      
     
+    'rpc_username' => '<your_account_name>',    // E.g admin
+    
+    'rpc_password' => '<your_account_password>',// E.g password
+    
+    'rpc_account_host' => '<rpc_account_hostname>',// E.g xmpp.example.com        
+    
     // Web socket address, it can be also nginx proxy
     // If you are using nginx proxy. Config line could look like 
     // 'ws://'.$_SERVER['HTTP_HOST'].'/websocket'

@@ -59,6 +59,12 @@ class RpcClient
 
     protected $host;
 
+    protected $account_host;
+    
+    protected $username;
+    
+    protected $password;
+    
     public function __construct(array $options)
     {
         if (!isset($options['server'])) {
@@ -69,6 +75,18 @@ class RpcClient
             throw new \InvalidArgumentException("Parameter 'host' is not specified");
         }
 
+        if (isset($options['username'])) {
+            $this->username = $options['username'];
+        }
+        
+        if (isset($options['password'])) {
+            $this->password = $options['password'];
+        }
+        
+        if (isset($options['account_host'])) {
+            $this->account_host = $options['account_host'];
+        }
+        
         $this->server = $options['server'];
         $this->host = $options['host'];
         $this->debug = isset($options['debug']) ? (bool)$options['debug'] : false;
@@ -76,6 +94,18 @@ class RpcClient
 
     protected function sendRequest($command, array $params)
     {
+        
+        if ($this->username != '' && $this->password != '' && $this->account_host != '') {
+            $params = [
+                [
+                    "user" => $this->username, 
+                    "server" => $this->account_host, 
+                    "password" => $this->password
+                ],
+                $params
+            ];
+        }
+               
         $request = xmlrpc_encode_request($command, $params, ['encoding' => 'utf-8', 'escaping' => 'markup']);
 
         $ch = curl_init();
