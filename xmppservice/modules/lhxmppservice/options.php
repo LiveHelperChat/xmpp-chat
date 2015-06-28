@@ -16,6 +16,9 @@ if ( isset($_POST['StoreOptions']) ) {
     $definition = array(
         'TrackOnline' => new ezcInputFormDefinitionElement(
             ezcInputFormDefinitionElement::OPTIONAL, 'boolean'
+        ),
+        'XMPPEnabled' => new ezcInputFormDefinitionElement(
+            ezcInputFormDefinitionElement::OPTIONAL, 'boolean'
         )
     );
       
@@ -26,6 +29,12 @@ if ( isset($_POST['StoreOptions']) ) {
         $data['track_online'] = 1;
     } else {
         $data['track_online'] = 0;
+    }
+        
+    if ( $form->hasValidData( 'XMPPEnabled' ) && $form->XMPPEnabled == true ) {
+        $data['xmpp_enabled'] = 1;
+    } else {
+        $data['xmpp_enabled'] = 0;
     }
     
     $xmppOptions->explain = '';
