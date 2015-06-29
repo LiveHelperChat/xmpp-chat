@@ -8,7 +8,7 @@ $fieldsSearch['username'] = array (
     'required' => false,
     'valid_if_filled' => false,
     'filter_type' => 'like',
-    'filter_table_field' => 'name',
+    'filter_table_field' => 'username',
     'validation_definition' => new ezcInputFormDefinitionElement (
             ezcInputFormDefinitionElement::OPTIONAL, 'unsafe_raw'
     )
