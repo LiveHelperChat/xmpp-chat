@@ -1,6 +1,5 @@
 <?php
 
-
 class erLhcoreClassExtensionXmppserviceHandler
 {
 
@@ -95,7 +94,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         }
         
         if ($asJson == true) {
-                 
+            
             $jsonObject = json_decode($response, true);
             
             if ($jsonObject === false) {
@@ -105,7 +104,7 @@ class erLhcoreClassExtensionXmppserviceHandler
             if ($jsonObject === null) {
                 throw new Exception('Could not decode JSON, response - ' . $response);
             }
-                        
+            
             return $jsonObject;
         }
         
@@ -154,7 +153,8 @@ class erLhcoreClassExtensionXmppserviceHandler
 
     /**
      *
-     * @param XMPP username
+     * @param
+     *            XMPP username
      *            
      * @return int related lhc user id
      *        
@@ -169,16 +169,16 @@ class erLhcoreClassExtensionXmppserviceHandler
     }
 
     /**
-     * @desc delete xmpp user operator/visitor/chat based
+     * delete xmpp user operator/visitor/chat based
      *
-     * @param unknown $params
+     * @param unknown $params            
      */
     public static function deleteXMPPUser($params)
     {
         $xmppAccount = $params['xmpp_account'];
         
         $userParts = explode('@', $xmppAccount->username);
-     
+        
         // Append automated hosting subdomain if required
         $subdomainUser = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
         if ($subdomainUser != '') {
@@ -190,13 +190,13 @@ class erLhcoreClassExtensionXmppserviceHandler
             "user" => $userParts[0],
             "host" => $params['xmpp_host'],
             "grouphost" => $params['xmpp_host'],
-            "group" => $xmppAccount->type == erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR ? 'operators'.$subdomainUser : 'visitors'.$subdomainUser
+            "group" => $xmppAccount->type == erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR ? 'operators' . $subdomainUser : 'visitors' . $subdomainUser
         );
         
         try {
             
             if ($params['handler'] == 'rpc') {
-                            
+                
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
                     'host' => $params['xmpp_host'],
@@ -204,18 +204,16 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'username' => $params['rpc_username'],
                     'password' => $params['rpc_password']
                 ]);
-            
-                $rpc->deleteUserSharedRosterGroup($data['user'],  $data['group']);
                 
+                $rpc->deleteUserSharedRosterGroup($data['user'], $data['group']);
             } else {
-            
+                
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-delete-user-from-roaster', $data);
                 
                 if ($response['error'] == true) {
                     throw new Exception($response['msg']);
                 }
             }
-            
         } catch (Exception $e) {
             
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
@@ -244,7 +242,6 @@ class erLhcoreClassExtensionXmppserviceHandler
                 ]);
                 
                 $rpc->unregisterUser($data['user']);
-                
             } else {
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-unregister', $data);
                 
@@ -252,7 +249,6 @@ class erLhcoreClassExtensionXmppserviceHandler
                     throw new Exception($response['msg']);
                 }
             }
-            
         } catch (Exception $e) {
             
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
@@ -264,11 +260,12 @@ class erLhcoreClassExtensionXmppserviceHandler
     }
 
     /**
-     * @desc Used then visitor writes a message but chat is not accepted and we send message to all connected resposible department operators from this user with next his message.
-     * 
+     * Used then visitor writes a message but chat is not accepted and we send message to all connected resposible department operators from this user with next his message.
+     *
      * @todo add RPC support
-     * 
-     * */
+     *      
+     *      
+     */
     public static function sendMessageByVisitorDirect($params = array())
     {
         $paramsOnlineUser = self::getNickAndStatusByChat($params['chat']);
@@ -286,7 +283,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         try {
             
             if ($params['handler'] == 'rpc') {
-            
+                
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
                     'host' => $params['xmpp_host'],
@@ -294,9 +291,8 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'username' => $params['rpc_username'],
                     'password' => $params['rpc_password']
                 ]);
-            
+                
                 $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
-            
             } else {
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
                 
@@ -314,8 +310,7 @@ class erLhcoreClassExtensionXmppserviceHandler
 
     /**
      * Used then chat is accepted by one of operators and visitor writes a message
-     * 
-     * */
+     */
     public static function sendMessageByVisitor($params = array())
     {
         $xmppAccount = $params['xmpp_account'];
@@ -331,7 +326,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         if ($params['chat']->user_id > 0) {
             
             $xmppAccountOperator = erLhcoreClassModelXMPPAccount::findOne(array(
-                'filter' => array (
+                'filter' => array(
                     'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR,
                     'user_id' => $params['chat']->user_id
                 )
@@ -349,9 +344,9 @@ class erLhcoreClassExtensionXmppserviceHandler
                 );
                 
                 try {
-
-                    if ($params['handler'] == 'rpc') {
                     
+                    if ($params['handler'] == 'rpc') {
+                        
                         $rpc = new \GameNet\Jabber\RpcClient([
                             'server' => $params['rpc_server'],
                             'host' => $params['xmpp_host'],
@@ -359,9 +354,8 @@ class erLhcoreClassExtensionXmppserviceHandler
                             'username' => $params['rpc_username'],
                             'password' => $params['rpc_password']
                         ]);
-                    
+                        
                         $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
-                    
                     } else {
                         $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
                         
@@ -382,10 +376,11 @@ class erLhcoreClassExtensionXmppserviceHandler
 
     /**
      * Used then chat is started and we send messages to all online operators
-     * 
+     *
      * @todo remake using rpc method
-     * 
-     * */
+     *      
+     *      
+     */
     public static function sendMessageStartChat($params = array())
     {
         $paramsOnlineUser = self::getNickAndStatusByChat($params['chat']);
@@ -413,9 +408,8 @@ class erLhcoreClassExtensionXmppserviceHandler
                 ]);
                 
                 $rpc->sendMessageChat($data['jid'], $data['operator_username'], $data['message']);
-                
             } else {
-            
+                
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-send-message', $data, false);
                 
                 if ($response != 'ok') {
@@ -509,40 +503,35 @@ class erLhcoreClassExtensionXmppserviceHandler
     }
 
     /**
-     * @desc
-     * 
      * Prebind xmpp sessions, it's faster this way. At the moment it's not used because websocket does not supports attach method
-     * 
-     * */
+     */
     public static function prebindSession($params)
     {
         $ch = curl_init($params['host']);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); 
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_USERPWD, $params['username'].':'.$params['password']);
+        curl_setopt($ch, CURLOPT_USERPWD, $params['username'] . ':' . $params['password']);
         $response = curl_exec($ch);
         
-        if ($response !== false && $response != ''){
+        if ($response !== false && $response != '') {
             
-            list($JID, $SID, $RID) = explode("\n", $response);
+            list ($JID, $SID, $RID) = explode("\n", $response);
             
-            return array (
+            return array(
                 'jid' => $JID,
                 'sid' => $SID,
-                'rid' => $RID,
+                'rid' => $RID
             );
         }
         
         return false;
     }
-    
-    
+
     /**
      * called then online visityor does a pageview
-     *
      */
     public static function onlineUserPageViewLogged($params = array())
     {
@@ -550,7 +539,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         
         // We execute only if nodejs handler is used, otherwise visitor connects himself
         if ($params['handler'] != 'rpc') {
-        
+            
             $paramsOnlineUser = self::getNickAndStatusByOnlineVisitor($params['ou']);
             
             $data = array(
@@ -567,7 +556,6 @@ class erLhcoreClassExtensionXmppserviceHandler
                 if ($response != 'ok') {
                     throw new Exception('ok as response not received');
                 }
-                
             } catch (Exception $e) {
                 if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                     erLhcoreClassLog::write(print_r($e, true));
@@ -583,10 +571,10 @@ class erLhcoreClassExtensionXmppserviceHandler
      *
      * register chat request as XMPP user and sends message to all online operators responsible to department
      *
-     * @param array $params    
-     *         
+     * @param array $params            
+     *
      * @throws Exception
-     * 
+     *
      */
     public static function newChat($params = array())
     {
@@ -602,7 +590,7 @@ class erLhcoreClassExtensionXmppserviceHandler
             $subdomainUser = '.' . $subdomainUser;
         }
         
-        $data = array (
+        $data = array(
             "user" => $userParts[0],
             "host" => $params['xmpp_host'],
             "password" => $xmppAccount->password,
@@ -618,26 +606,23 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
-                    'host' => $params['xmpp_host'],                    
+                    'host' => $params['xmpp_host'],
                     'account_host' => $params['rpc_account_host'],
                     'username' => $params['rpc_username'],
                     'password' => $params['rpc_password']
                 ]);
                 
-                
                 $rpc->createUser($data['user'], $data['password']);
                 
                 $rpc->addUserToSharedRosterGroup($data['user'], $data['group']);
+            } else {
                 
-            } else {   
-                         
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-register-online-visitor', $data);
                 
                 if ($response['error'] == true) {
                     throw new Exception($response['msg']);
                 }
             }
-            
         } catch (Exception $e) {
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                 erLhcoreClassLog::write(print_r($e, true));
@@ -666,7 +651,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         try {
             
             if ($params['handler'] == 'rpc') {
-            
+                
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
                     'host' => $params['xmpp_host'],
@@ -674,13 +659,12 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'username' => $params['rpc_username'],
                     'password' => $params['rpc_password']
                 ]);
-            
-                $rpc->changePassword($data['user'],  $data['password']);
-         
-            } else {     
-                       
+                
+                $rpc->changePassword($data['user'], $data['password']);
+            } else {
+                
                 $response = self::sendRequest($params['node_api_server'] . '/xmpp-change-password', $data);
-                         
+                
                 if ($response['error'] == true) {
                     throw new Exception($response['msg']);
                 }
@@ -696,12 +680,12 @@ class erLhcoreClassExtensionXmppserviceHandler
 
     /**
      * registers operator and assigns to shared operators roaster
-     * 
-     * @param array $params
+     *
+     * @param array $params            
      */
     public static function registerOperator($params = array())
     {
-        try {                        
+        try {
             if ($params['handler'] == 'rpc') {
                 
                 $rpc = new \GameNet\Jabber\RpcClient([
@@ -712,8 +696,7 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'password' => $params['rpc_password']
                 ]);
                 
-                $rpc->createUser($params['xmpp_account']->username_plain,  $params['xmpp_account']->password);
-                
+                $rpc->createUser($params['xmpp_account']->username_plain, $params['xmpp_account']->password);
             } else {
                 
                 $data = array(
@@ -728,7 +711,6 @@ class erLhcoreClassExtensionXmppserviceHandler
                     throw new Exception($response['msg']);
                 }
             }
-            
         } catch (Exception $e) {
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                 erLhcoreClassLog::write(print_r($e, true));
@@ -746,7 +728,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         try {
             
             if ($params['handler'] == 'rpc') {
-
+                
                 $rpc = new \GameNet\Jabber\RpcClient([
                     'server' => $params['rpc_server'],
                     'host' => $params['xmpp_host'],
@@ -755,11 +737,7 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'password' => $params['rpc_password']
                 ]);
                 
-                $rpc->addUserToSharedRosterGroup(
-                    $params['xmpp_account']->username_plain,  
-                    'operators' . $subdomainUser
-                );                
-                
+                $rpc->addUserToSharedRosterGroup($params['xmpp_account']->username_plain, 'operators' . $subdomainUser);
             } else {
                 
                 // Assign user to operators roaster
@@ -776,7 +754,6 @@ class erLhcoreClassExtensionXmppserviceHandler
                     throw new Exception($response['msg']);
                 }
             }
-            
         } catch (Exception $e) {
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                 erLhcoreClassLog::write(print_r($e, true));
@@ -790,7 +767,7 @@ class erLhcoreClassExtensionXmppserviceHandler
      * Is executed then new online visitor account is created
      *
      * @todo test
-     *
+     *      
      * @param array $params            
      */
     public static function newOnlineVisitor($params = array())
@@ -820,19 +797,14 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'password' => $params['rpc_password']
                 ]);
                 
-                $rpc->createUser($userParts[0],  $xmppAccount->password);
+                $rpc->createUser($userParts[0], $xmppAccount->password);
                 
-                $rpc->addUserToSharedRosterGroup(
-                    $userParts[0],
-                    'visitors' . $subdomainUser
-                );
-                          
+                $rpc->addUserToSharedRosterGroup($userParts[0], 'visitors' . $subdomainUser);
             } catch (Exception $e) {
                 if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                     erLhcoreClassLog::write(print_r($e, true));
                 }
             }
-            
         } else {
             $data = array(
                 "user" => $userParts[0],
@@ -860,27 +832,26 @@ class erLhcoreClassExtensionXmppserviceHandler
         // Cleanup is made then new account is created
         self::cleanupOldXMPPAccounts();
     }
-    
+
     /**
      * Checks that instance of shared roaster existed
-     * 
      */
     public static function checkSharedRoasters($params)
     {
         // Delete visitors shared roaster
         $data[] = array(
-            "group" => "visitors.".$params['subdomain'],
-            "host" => $params['xmpp_host'],
+            "group" => "visitors." . $params['subdomain'],
+            "host" => $params['xmpp_host']
         );
         
         $data[] = array(
-            "group" => "operators.".$params['subdomain'],
-            "host" => $params['xmpp_host'],
+            "group" => "operators." . $params['subdomain'],
+            "host" => $params['xmpp_host']
         );
         
         // First register visitors shared roaster
-        $dataRegister["visitors.".$params['subdomain']] = array(
-            "group" => "visitors.".$params['subdomain'],
+        $dataRegister["visitors." . $params['subdomain']] = array(
+            "group" => "visitors." . $params['subdomain'],
             "host" => $params['xmpp_host'],
             "name" => "Visitors",
             "desc" => "Visitors",
@@ -889,13 +860,16 @@ class erLhcoreClassExtensionXmppserviceHandler
         );
         
         // Register operators shared roaster
-        $dataRegister["operators.".$params['subdomain']] = array(
-            "group" => "operators.".$params['subdomain'],
+        $dataRegister["operators." . $params['subdomain']] = array(
+            "group" => "operators." . $params['subdomain'],
             "host" => $params['xmpp_host'],
             "name" => "Operators",
             "desc" => "Operators",
-            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"',
-            "display_array" => ['operators.'.$params['subdomain'],'visitors.'.$params['subdomain']]
+            "display" => '\"operators.' . $params['subdomain'] . '\\\nvisitors.' . $params['subdomain'] . '\"',
+            "display_array" => [
+                'operators.' . $params['subdomain'],
+                'visitors.' . $params['subdomain']
+            ]
         );
         
         if ($params['handler'] == 'rpc') {
@@ -909,77 +883,65 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'password' => $params['rpc_password']
                 ]);
                 
-                foreach ($data as $groupData) {                
+                foreach ($data as $groupData) {
                     $infoSharedRoaster = $rpc->getInfoSharedRosterGroup($groupData['group']);
                     
                     if (empty($infoSharedRoaster)) {
-                        $rpc->createSharedRosterGroup(
-                            $dataRegister[$groupData['group']]['group'], 
-                            $dataRegister[$groupData['group']]['name'], 
-                            $dataRegister[$groupData['group']]['desc'],
-                            $dataRegister[$groupData['group']]['display_array']);                                        
+                        $rpc->createSharedRosterGroup($dataRegister[$groupData['group']]['group'], $dataRegister[$groupData['group']]['name'], $dataRegister[$groupData['group']]['desc'], $dataRegister[$groupData['group']]['display_array']);
                     }
                 }
-                
             } catch (Exception $e) {
                 if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                     erLhcoreClassLog::write(print_r($e, true));
                 }
-                        
+                
                 throw $e;
             }
-            
         } else {
             // Iterates through groups and checks des it exists, if not creates
-            foreach ($data as $groupData)
-            {            
+            foreach ($data as $groupData) {
                 try {
                     $response = self::sendRequest($params['node_api_server'] . '/xmpp-does-shared-roaster-exists', $groupData);
-            
-                    if ($response['error'] == true) {                    
-                         try {
+                    
+                    if ($response['error'] == true) {
+                        try {
                             $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $dataRegister[$groupData['group']]);
-                        
+                            
                             if ($response['error'] == true) {
                                 throw new Exception($response['msg']);
                             }
-                            
                         } catch (Exception $e) {
                             throw $e;
-                        }                    
-                    }                
-                    
+                        }
+                    }
                 } catch (Exception $e) {
                     if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                         erLhcoreClassLog::write(print_r($e, true));
                     }
-                            
+                    
                     throw $e;
                 }
             }
         }
     }
-    
-    
+
     /**
      * Get's called then instance is destroyed
-     * 
-     * */
+     */
     public static function instanceDestroyed($params)
     {
         // Delete visitors shared roaster
         $data[] = array(
-            "group" => "visitors.".$params['subdomain'],
-            "host" => $params['xmpp_host'],
+            "group" => "visitors." . $params['subdomain'],
+            "host" => $params['xmpp_host']
         );
         
         $data[] = array(
-            "group" => "operators.".$params['subdomain'],
-            "host" => $params['xmpp_host'],
+            "group" => "operators." . $params['subdomain'],
+            "host" => $params['xmpp_host']
         );
         
-        foreach ($data as $groupData)
-        {
+        foreach ($data as $groupData) {
             if ($params['handler'] == 'rpc') {
                 try {
                     $rpc = new \GameNet\Jabber\RpcClient([
@@ -989,69 +951,71 @@ class erLhcoreClassExtensionXmppserviceHandler
                         'username' => $params['rpc_username'],
                         'password' => $params['rpc_password']
                     ]);
-    
+                    
                     foreach ($data as $groupData) {
                         $rpc->deleteSharedRosterGroup($groupData['group']);
                     }
-                                        
-                } catch (Exception $e) {  
+                } catch (Exception $e) {
                     
                     if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                         erLhcoreClassLog::write(print_r($e, true));
                     }
                     
                     // To terminate instance termination
-                    throw $e;                
+                    throw $e;
                 }
-                
             } else {
                 try {
                     $response = self::sendRequest($params['node_api_server'] . '/xmpp-delete-instance-roasters', $groupData);
-                
+                    
                     if ($response['error'] == true) {
                         throw new Exception($response['msg']);
                     }
-                
                 } catch (Exception $e) {
                     if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                         erLhcoreClassLog::write(print_r($e, true));
                     }
                     
                     // To terminate instance termination
-                    throw $e;                
+                    throw $e;
                 }
             }
-        }   
+        }
     }
-        
+
     /**
      * Creates required shared roasters
-     * 
+     *
      * @todo add support for RPC
-     * 
-     * */
-    public static function registerInstanceRoasters($params) {
+     *      
+     *      
+     */
+    public static function registerInstanceRoasters($params)
+    {
         
         // First register visitors shared roaster
         $data[] = array(
-              "group" => "visitors.".$params['subdomain'],
-              "host" => $params['xmpp_host'],
-              "name" => "Visitors",
-              "desc" => "Visitors",
-              "display" => '\"\"',
-              "display_array" => []
+            "group" => "visitors." . $params['subdomain'],
+            "host" => $params['xmpp_host'],
+            "name" => "Visitors",
+            "desc" => "Visitors",
+            "display" => '\"\"',
+            "display_array" => []
         );
         
         // Register operators shared roaster
         $data[] = array(
-            "group" => "operators.".$params['subdomain'],
+            "group" => "operators." . $params['subdomain'],
             "host" => $params['xmpp_host'],
             "name" => "Operators",
             "desc" => "Operators",
-            "display" => '\"operators.'.$params['subdomain'].'\\\nvisitors.'.$params['subdomain'].'\"',
-            "display_array" => ['operators.'.$params['subdomain'],'visitors.'.$params['subdomain']]
+            "display" => '\"operators.' . $params['subdomain'] . '\\\nvisitors.' . $params['subdomain'] . '\"',
+            "display_array" => [
+                'operators.' . $params['subdomain'],
+                'visitors.' . $params['subdomain']
+            ]
         );
-                
+        
         if ($params['handler'] == 'rpc') {
             try {
                 $rpc = new \GameNet\Jabber\RpcClient([
@@ -1061,36 +1025,27 @@ class erLhcoreClassExtensionXmppserviceHandler
                     'username' => $params['rpc_username'],
                     'password' => $params['rpc_password']
                 ]);
-            
+                
                 foreach ($data as $groupData) {
                     $infoSharedRoaster = $rpc->getInfoSharedRosterGroup($groupData['group']);
-            
+                    
                     if (empty($infoSharedRoaster)) {
-                        $rpc->createSharedRosterGroup(
-                            $groupData['group'],
-                            $groupData['name'],
-                            $groupData['desc'],
-                            $groupData['display_array']);
+                        $rpc->createSharedRosterGroup($groupData['group'], $groupData['name'], $groupData['desc'], $groupData['display_array']);
                     }
                 }
-            
             } catch (Exception $e) {
                 if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                     erLhcoreClassLog::write(print_r($e, true));
                 }
-            
             }
-            
-        } else { 
-            foreach ($data as $groupData)
-            {
+        } else {
+            foreach ($data as $groupData) {
                 try {
                     $response = self::sendRequest($params['node_api_server'] . '/xmpp-setup-instance-roasters', $groupData);
-                
+                    
                     if ($response['error'] == true) {
                         throw new Exception($response['msg']);
                     }
-                    
                 } catch (Exception $e) {
                     if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                         erLhcoreClassLog::write(print_r($e, true));
@@ -1099,9 +1054,9 @@ class erLhcoreClassExtensionXmppserviceHandler
             }
         }
     }
-    
+
     /**
-     * @desc Executed in erLhcoreClassExtensionXmppserviceHandler::handleMessageFromOperator send message to user from operator.
+     * Executed in erLhcoreClassExtensionXmppserviceHandler::handleMessageFromOperator send message to user from operator.
      * if provided message is a command to operator is send command response
      *
      * @param erLhcoreClassModelChat $chat            
@@ -1122,91 +1077,112 @@ class erLhcoreClassExtensionXmppserviceHandler
             $user = $xmppUser->user;
             
             $messageUserId = $user->id;
-
+            
+            $ignoreMessage = false;
+            
             // Predefine
-            $statusCommand = array (
+            $statusCommand = array(
                 'processed' => false,
-                'process_status' => '',
+                'process_status' => ''
             );
             
             if (strpos(trim($body), '!') === 0) {
                 
-                $statusCommand = erLhcoreClassChatCommand::processCommand(array('no_ui_update' => true, 'msg' => $body, 'chat' => & $chat));
+                $statusCommand = erLhcoreClassChatCommand::processCommand(array(
+                    'no_ui_update' => true,
+                    'msg' => $body,
+                    'chat' => & $chat
+                ));
                 if ($statusCommand['processed'] === true) {
-                    $messageUserId = -1; // Message was processed set as internal message
-                    $body = '[b]'.$userData->name_support.'[/b]: '.$body .' '. ($statusCommand['process_status'] != '' ? '|| '.$statusCommand['process_status'] : '');
-                }               
-            }
-   
-            $msg = new erLhcoreClassModelmsg();
-            $msg->msg = $body;
-            $msg->chat_id = $chat->id;
-            $msg->user_id = $messageUserId;
-            $msg->time = time();
-            $msg->name_support = $user->name_support;
-            
-            if ($messageUserId > 0 && $chat->chat_locale != '' && $chat->chat_locale_to != '') {
-                erLhcoreClassTranslate::translateChatMsgOperator($chat, $msg);
-            }
-            
-            erLhcoreClassChat::getSession()->save($msg);
-            
-            // Set last message ID
-            if ($chat->last_msg_id < $msg->id) {
-                
-                $userChange = '';
-                
-                // Assign operator if chat does not have one
-                if ($chat->user_id == 0) {
-                    $userChange = ',user_id = :user_id';
+                    $messageUserId = - 1; // Message was processed set as internal message
+                    $body = '[b]' . $userData->name_support . '[/b]: ' . $body . ' ' . ($statusCommand['process_status'] != '' ? '|| ' . $statusCommand['process_status'] : '');
                 }
                 
-                $stmt = $db->prepare("UPDATE lh_chat SET status = :status, user_status = :user_status, last_msg_id = :last_msg_id{$userChange} WHERE id = :id");
-                $stmt->bindValue(':id', $chat->id, PDO::PARAM_INT);
-                $stmt->bindValue(':last_msg_id', $msg->id, PDO::PARAM_INT);
-                
-                $changeStatus = false;
-                
-                if ($user->invisible_mode == 0) {
-                    if ($chat->status == erLhcoreClassModelChat::STATUS_PENDING_CHAT) {
-                        $chat->status = erLhcoreClassModelChat::STATUS_ACTIVE_CHAT;
-                        $changeStatus = true;
-                    }
+                if (isset($statusCommand['ignore']) && $statusCommand['ignore'] == true) {
+                    $ignoreMessage = true;
                 }
                 
-                if ($chat->user_status == erLhcoreClassModelChat::USER_STATUS_CLOSED_CHAT) {
-                    $chat->user_status = erLhcoreClassModelChat::USER_STATUS_PENDING_REOPEN;
+                if (isset($statusCommand['info'])) {
+                    $xmppService = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice');
+                    $xmppService->sendMessageToOperatorAsUserByChat(array(
+                        'xmpp_account_operator' => $xmppUser,
+                        'chat' => $chat,
+                        'msg' => '[[System Assistant]] ' . $statusCommand['info']
+                    ));
+                }
+            }
+            
+            if ($ignoreMessage == false) {
+                $msg = new erLhcoreClassModelmsg();
+                $msg->msg = $body;
+                $msg->chat_id = $chat->id;
+                $msg->user_id = $messageUserId;
+                $msg->time = time();
+                $msg->name_support = $user->name_support;
+                
+                if ($messageUserId > 0 && $chat->chat_locale != '' && $chat->chat_locale_to != '') {
+                    erLhcoreClassTranslate::translateChatMsgOperator($chat, $msg);
+                }
+                
+                erLhcoreClassChat::getSession()->save($msg);
+                
+                // Set last message ID
+                if ($chat->last_msg_id < $msg->id) {
                     
-                    if ( ($onlineuser = $chat->online_user) !== false) {
-                        $onlineuser->reopen_chat = 1;
-                        $onlineuser->saveThis();
-                    }                    
+                    $userChange = '';
+                    
+                    // Assign operator if chat does not have one
+                    if ($chat->user_id == 0) {
+                        $userChange = ',user_id = :user_id';
+                    }
+                    
+                    $stmt = $db->prepare("UPDATE lh_chat SET status = :status, user_status = :user_status, last_msg_id = :last_msg_id{$userChange} WHERE id = :id");
+                    $stmt->bindValue(':id', $chat->id, PDO::PARAM_INT);
+                    $stmt->bindValue(':last_msg_id', $msg->id, PDO::PARAM_INT);
+                    
+                    $changeStatus = false;
+                    
+                    if ($user->invisible_mode == 0) {
+                        if ($chat->status == erLhcoreClassModelChat::STATUS_PENDING_CHAT) {
+                            $chat->status = erLhcoreClassModelChat::STATUS_ACTIVE_CHAT;
+                            $changeStatus = true;
+                        }
+                    }
+                    
+                    if ($chat->user_status == erLhcoreClassModelChat::USER_STATUS_CLOSED_CHAT) {
+                        $chat->user_status = erLhcoreClassModelChat::USER_STATUS_PENDING_REOPEN;
+                        
+                        if (($onlineuser = $chat->online_user) !== false) {
+                            $onlineuser->reopen_chat = 1;
+                            $onlineuser->saveThis();
+                        }
+                    }
+                    
+                    $stmt->bindValue(':user_status', $chat->user_status, PDO::PARAM_INT);
+                    $stmt->bindValue(':status', $chat->status, PDO::PARAM_INT);
+                    
+                    if ($userChange != '') {
+                        $stmt->bindValue(':user_id', $msg->user_id, PDO::PARAM_INT);
+                    }
+                    
+                    $stmt->execute();
                 }
                 
-                $stmt->bindValue(':user_status', $chat->user_status, PDO::PARAM_INT);
-                $stmt->bindValue(':status', $chat->status, PDO::PARAM_INT);
-                
-                if ($userChange != '') {
-                    $stmt->bindValue(':user_id', $msg->user_id, PDO::PARAM_INT);
+                // If chat status changes update statistic
+                if ($changeStatus == true) {
+                    
+                    if ($chat->department !== false) {
+                        erLhcoreClassChat::updateDepartmentStats($chat->department);
+                    }
+                    
+                    erLhcoreClassChat::updateActiveChats($chat->user_id);
                 }
-                
-                $stmt->execute();
-            }
-              
-            // If chat status changes update statistic
-            if ($changeStatus == true) {
-                
-                if ($chat->department !== false) {
-                    erLhcoreClassChat::updateDepartmentStats($chat->department);
-                }
-                
-                erLhcoreClassChat::updateActiveChats($chat->user_id);
             }
             
             $db->commit();
             
             // Inform operator about command status
-            if ($statusCommand['processed'] == true) {
+            if ($statusCommand['processed'] == true && $statusCommand['process_status'] != '') {
                 $xmppService = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice');
                 $xmppService->sendMessageToOperatorAsUserByChat(array(
                     'xmpp_account_operator' => $xmppUser,
@@ -1226,7 +1202,6 @@ class erLhcoreClassExtensionXmppserviceHandler
                 'msg' => & $msg,
                 'chat' => & $chat
             ));
-
         } catch (Exception $e) {
             $db->rollback();
             throw $e;
@@ -1314,7 +1289,7 @@ class erLhcoreClassExtensionXmppserviceHandler
 
     /**
      * Handlers requests like
-     * 
+     *
      * May 08 23:02:11 [Warning] [default] [default] {"action":"ping","user":"remdex2@xmpp.livehelperchat.com/25304460891431118632139491"}
      * May 08 23:02:14 [Warning] [default] [default] {"action":"disconnect","user":"remdex2","server":"xmpp.livehelperchat.com"}
      * May 08 23:21:52 [Warning] [default] [default] {"action":"connect","user":"remdex2","server":"xmpp.livehelperchat.com"}
