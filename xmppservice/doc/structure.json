@@ -3,7 +3,7 @@
         "lhc_xmpp_service_account": [
             {
                 "field": "id",
-                "type": "bigint(11)",
+                "type": "bigint(20)",
                 "null": "NO",
                 "key": "PRI",
                 "default": null,
@@ -27,7 +27,7 @@
             },            
             {
                 "field": "user_id",
-                "type": "bigint(11)",
+                "type": "bigint(20)",
                 "null": "NO",
                 "key": "",
                 "default": 1,
