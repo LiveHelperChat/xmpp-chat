@@ -56,19 +56,19 @@ trait RosterTrait
     {
         $response = $this->sendRequest(
             'get_roster',
-            [
+            array(
                 'user' => $user,
                 'host' => $this->host,
-            ]
+            )
         );
 
         if (!isset($response['contacts']) || empty($response['contacts'])) {
-            return [];
+            return array();
         }
 
-        $rosterContacts = [];
+        $rosterContacts = array();
         foreach ($response['contacts'] as $item) {
-            $contact = [];
+            $contact = array();
             foreach ($item['contact'] as $data) {
                 foreach ($data as $key => $value) {
                     $contact[$key] = $value;
@@ -101,7 +101,7 @@ trait RosterTrait
     {
         $this->sendRequest(
             'add_rosteritem',
-            [
+            array(
                 'localuser'   => $user,
                 'localserver' => $this->host,
                 'user'        => $contact,
@@ -109,7 +109,7 @@ trait RosterTrait
                 'nick'        => $nickname,
                 'group'       => $group,
                 'subs'        => $subs,
-            ]
+            )
         );
     }
 
@@ -128,12 +128,12 @@ trait RosterTrait
     {
         $this->sendRequest(
             'delete_rosteritem',
-            [
+            array(
                 'localuser'   => $localUser,
                 'localserver' => $this->host,
                 'user'        => $user,
                 'server'      => $this->host,
-            ]
+            )
         );
     }
 } 

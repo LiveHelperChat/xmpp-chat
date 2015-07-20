@@ -55,13 +55,13 @@ trait GroupTrait
     {
         $this->sendRequest(
             'srg_create',
-            [
+            array(
                 'host'        => $this->host,
                 'group'       => (string) $groupId,
                 'name'        => $name,
                 'description' => $description,
                 'display'     => join("\\n",$display),
-            ]
+            )
         );
     }
 
@@ -74,10 +74,10 @@ trait GroupTrait
     {
         $this->sendRequest(
             'srg_delete',
-            [
+            array(
                 'host'  => $this->host,
                 'group' => $groupId,
-            ]
+            )
         );
     }
 
@@ -92,17 +92,17 @@ trait GroupTrait
     {
         $response = $this->sendRequest(
             'srg_get_members',
-            [
+            array(
                 'host'  => $this->host,
                 'group' => $groupId,
-            ]
+            )
         );
 
         if (!isset($response['members']) || empty($response['members'])) {
-            return [];
+            return array();
         }
 
-        $members = [];
+        $members = array();
         foreach ($response['members'] as $member) {
             $members[] = $member['member'];
         }
@@ -120,12 +120,12 @@ trait GroupTrait
     {
         return $this->sendRequest(
             'srg_user_add',
-            [
+            array(
                 'user'      => $user,
                 'host'      => $this->host,
                 'group'     => $groupId,
                 'grouphost' => $this->host,
-            ]
+            )
         );
     }
 
@@ -139,12 +139,12 @@ trait GroupTrait
     {
         return $this->sendRequest(
             'srg_user_del',
-            [
+            array(
                 'user'      => $user,
                 'host'      => $this->host,
                 'group'     => $groupId,
                 'grouphost' => $this->host,
-            ]
+            )
         );
     }
 
@@ -157,14 +157,14 @@ trait GroupTrait
     {
         $response = $this->sendRequest(
             'srg_list',
-            ['host' => $this->host]
+            array('host' => $this->host)
         );
 
         if (!isset($response['groups']) || empty($response['groups'])) {
-            return [];
+            return array();
         }
 
-        $sharedGroups = [];
+        $sharedGroups = array();
         foreach ($response['groups'] as $group) {
             $sharedGroups[] = $group['id'];
         }
@@ -181,20 +181,20 @@ trait GroupTrait
     {
         $response = $this->sendRequest(
             'srg_get_info',
-            [
+            array(
                 'host'  => $this->host,
                 'group' => $groupId,
-            ]
+            )
         );
 
         if (!isset($response['informations']) || empty($response['informations'])) {
-            return [];
+            return array();
         }
 
-        $info = [];
+        $info = array();
         foreach ($response['informations'] as $element) {
             $key = $element['information'][0]['key'];
-            $value = str_replace(['[', ']', '<<"', '">>'], '', $element['information'][1]['value']);
+            $value = str_replace(array('[', ']', '<<"', '">>'), '', $element['information'][1]['value']);
             $info[$key] = ($key === 'displayed_groups') ? explode(',', $value) : $value;
         }
 

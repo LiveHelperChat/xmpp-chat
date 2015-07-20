@@ -56,11 +56,11 @@ trait UserTrait
     {
         $response = $this->sendRequest(
             'register',
-            [
+            array(
                 'host'     => $this->host,
                 'user'     => $user,
                 'password' => $password
-            ]
+            )
         );
 
         if ($response['res'] != 0) {
@@ -79,10 +79,10 @@ trait UserTrait
     {
         $response = $this->sendRequest(
             'check_account',
-            [
+            array(
                 'user' => $user,
                 'host' => $this->host
-            ]
+            )
         );
 
         return $response['res'] == 0;
@@ -98,11 +98,11 @@ trait UserTrait
     {
         $this->sendRequest(
             'change_password',
-            [
+            array(
                 'host'    => $this->host,
                 'user'    => $user,
                 'newpass' => $password
-            ]
+            )
         );
     }
 
@@ -118,11 +118,11 @@ trait UserTrait
     {
         $this->sendRequest(
             'set_nickname',
-            [
+            array(
                 'host'     => $this->host,
                 'user'     => $user,
                 'nickname' => $nickname
-            ]
+            )
         );
     }
 
@@ -139,10 +139,10 @@ trait UserTrait
     {
         $response = $this->sendRequest(
             'get_last',
-            [
+            array(
                 'host' => $this->host,
                 'user' => $user,
-            ]
+            )
         );
 
         return $response['last_activity'];
@@ -161,13 +161,13 @@ trait UserTrait
     {
         $this->sendRequest(
             'send_message',
-            [
+            array(
                 'type' => $type,
                 'from' => $fromJid,
                 'to'   => $toJid,
                 'subject' => $subject,
                 'body' => $message
-            ]
+            )
         );
     }
     
@@ -182,10 +182,10 @@ trait UserTrait
     {
         $this->sendRequest(
             'unregister',
-            [
+            array(
                 'host' => $this->host,
                 'user' => $user,
-            ]
+            )
         );
     }
 
@@ -221,19 +221,19 @@ trait UserTrait
     {
         $response = $this->sendRequest(
             'user_sessions_info',
-            [
+            array(
                 'host' => $this->host,
                 'user' => $user,
-            ]
+            )
         );
 
         if (!isset($response['sessions_info']) || empty($response['sessions_info'])) {
-            return [];
+            return array();
         }
 
-        $sessions = [];
+        $sessions = array();
         foreach ($response['sessions_info'] as $info) {
-            $session = [];
+            $session = array();
             foreach ($info['session'] as $data) {
                 foreach ($data as $key => $value) {
                     $session[$key] = $value;
@@ -259,19 +259,19 @@ trait UserTrait
             $command = 'get_vcard2';
             list($name, $subname) = explode(' ', $name);
 
-            $params = [
+            $params = array(
                 'host' => $this->host,
                 'user' => $user,
                 'name' => $name,
                 'subname' => $subname,
-            ];
+            );
         } else {
             $command = 'get_vcard';
-            $params = [
+            $params = array(
                 'host' => $this->host,
                 'user' => $user,
                 'name' => $name,
-            ];
+            );
         }
 
         try {
@@ -296,21 +296,21 @@ trait UserTrait
             $command = 'set_vcard2';
             list($name, $subname) = explode(' ', $name);
 
-            $params = [
+            $params = array(
                 'host' => $this->host,
                 'user' => $user,
                 'name' => $name,
                 'subname' => $subname,
                 'content' => $value,
-            ];
+            );
         } else {
             $command = 'set_vcard';
-            $params = [
+            $params = array(
                 'host' => $this->host,
                 'user' => $user,
                 'name' => $name,
                 'content' => $value,
-            ];
+            );
         }
 
         $this->sendRequest($command, $params);
@@ -326,11 +326,11 @@ trait UserTrait
     {
         $this->sendRequest(
             'ban_account',
-            [
+             array(
                 'host' => $this->host,
                 'user' => $user,
                 'reason' => $reason,
-            ]
+            )
         );
     }
 
@@ -347,12 +347,12 @@ trait UserTrait
             $stanza = str_replace('{resource}', $session['resource'], $stanza);
             $this->sendRequest(
                 'send_stanza_c2s',
-                [
+                array(
                     'host' => $this->host,
                     'user' => $user,
                     'resource' => $session['resource'],
                     'stanza' => $stanza,
-                ]
+                )
             );
         }
     }
@@ -401,12 +401,12 @@ trait UserTrait
     {
         $this->sendRequest(
             'add_jid_to_group',
-            [
+            array(
                 'localserver' => $this->host,
                 'localuser'   => $user,
                 'jid'         => "$contact@$this->host",
                 'group'       => $group,
-            ]
+            )
         );
     }
 
@@ -427,13 +427,13 @@ trait UserTrait
     {
         $this->sendRequest(
             'delete_jid_from_group',
-            [
+            array(
                 'localserver'  => $this->host,
                 'localuser'    => $user,
                 'jid'          => "$contact@$this->host",
                 'group'        => $group,
                 'deleteroster' => "false",
-            ]
+            )
         );
     }
 }

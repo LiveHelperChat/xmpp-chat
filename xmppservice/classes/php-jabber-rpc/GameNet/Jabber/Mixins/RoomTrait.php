@@ -52,11 +52,11 @@ trait RoomTrait
     {
         $this->sendRequest(
             'create_room',
-            [
+            array(
                 'name'    => $name,
                 'service' => 'conference.' . $this->host,
                 'host'    => $this->host,
-            ]
+            )
         );
     }
 
@@ -74,12 +74,12 @@ trait RoomTrait
     {
         $this->sendRequest(
             'send_direct_invitation',
-            [
+            array(
                 'room'     => $name . '@conference.' . $this->host,
                 'password' => $password,
                 'reason'   => $reason,
                 'users'    => join(':', $users),
-            ]
+            )
         );
     }
 
@@ -92,11 +92,11 @@ trait RoomTrait
     {
         $this->sendRequest(
             'destroy_room',
-            [
+            array(
                 'name'    => $name,
                 'service' => 'conference.' . $this->host,
                 'host'    => $this->host,
-            ]
+            )
         );
     }
 
@@ -109,14 +109,14 @@ trait RoomTrait
     {
         $rooms = $this->sendRequest(
             'muc_online_rooms',
-            ['host' => $this->host]
+             array('host' => $this->host)
         );
 
         if (!isset($rooms['rooms']) || empty($rooms['rooms'])) {
-            return [];
+            return  array();
         }
 
-        $roomList = [];
+        $roomList = array();
         foreach ($rooms['rooms'] as $item) {
             $roomList[] = $item['room'];
         }
@@ -153,12 +153,12 @@ trait RoomTrait
 
         $this->sendRequest(
             'change_room_option',
-            [
+            array(
                 'name'    => $name,
                 'service' => 'conference.' . $this->host,
                 'option'  => $option,
                 'value'   => (string) $value,
-            ]
+            )
         );
     }
 
@@ -174,12 +174,12 @@ trait RoomTrait
     {
         $this->sendRequest(
             'set_room_affiliation',
-            [
+            array(
                 'name'        => $name,
                 'service'     => 'conference.' . $this->host,
                 'jid'         => $userJid,
                 'affiliation' => $affiliation,
-            ]
+            )
         );
     }
 }

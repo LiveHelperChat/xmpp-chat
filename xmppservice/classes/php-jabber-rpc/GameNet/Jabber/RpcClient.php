@@ -96,17 +96,17 @@ class RpcClient
     {
         
         if ($this->username != '' && $this->password != '' && $this->account_host != '') {
-            $params = [
-                [
+            $params = array(
+                 array(
                     "user" => $this->username, 
                     "server" => $this->account_host, 
                     "password" => $this->password
-                ],
+                ),
                 $params
-            ];
+            );
         }
                
-        $request = xmlrpc_encode_request($command, $params, ['encoding' => 'utf-8', 'escaping' => 'markup']);
+        $request = xmlrpc_encode_request($command, $params, array('encoding' => 'utf-8', 'escaping' => 'markup'));
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->server);
@@ -117,7 +117,7 @@ class RpcClient
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['User-Agent: GameNet', 'Content-Type: text/xml']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('User-Agent: GameNet', 'Content-Type: text/xml'));
         $response = curl_exec($ch);
         curl_close($ch);
 
