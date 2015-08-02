@@ -1321,6 +1321,18 @@ class erLhcoreClassExtensionXmppserviceHandler
             // Updates last activity to zero
             if (is_numeric($userId)) {
                 self::updateActivityByUserId($userId, $params['action'] == 'connect' ? time() : 0);
+                
+                if ($params['action'] == 'connect') {
+                    
+                    $userData = erLhcoreClassModelUser::fetch($userId);
+                                        
+                    if ($userData instanceof erLhcoreClassModelUser && $userData->hide_online == 1) {
+                        $userData->hide_online = 0;
+                        erLhcoreClassUser::getSession()->update($userData);
+                        erLhcoreClassUserDep::setHideOnlineStatus($userData);
+                    }
+                }               
+                
             } else {
                 throw new Exception("Could not find LHC user by user - " . $params['user'] . '@' . $params['server']);
             }
