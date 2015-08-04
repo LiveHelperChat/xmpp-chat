@@ -196,10 +196,10 @@ class erLhcoreClassExtensionXmppservice
      * */
     public function afterLogout($params)
     {
-        if ($this->settings['enabled'] == true && $this->settings['check_xmpp_activity_on_web_logout'] == true && erLhcoreClassModelXMPPAccount::getCount(array('filtergt' => array('lactivity' => time() - (int)erLhcoreClassModelChatConfig::fetch('sync_sound_settings')->data['online_timeout'] - (int)$this->settings['append_time']),'filter' => array('user_id' => $params['user']->getUserID())))) {
+        if ($this->settings['enabled'] == true && $this->settings['check_xmpp_activity_on_web_logout'] == true && erLhcoreClassModelXMPPAccount::getCount(array('filtergt' => array('lactivity' => time() - (int)erLhcoreClassModelChatConfig::fetch('sync_sound_settings')->data['online_timeout'] - (int)$this->settings['append_time']),'filter' => array('user_id' => (int)$params['user']->getUserID())))) {
             $db = ezcDbInstance::get();
             $stmt = $db->prepare('UPDATE lh_userdep SET last_activity = :last_activity WHERE user_id = :user_id');
-            $stmt->bindValue( ':last_activity',time()+$xmppService->settings['append_time']);
+            $stmt->bindValue( ':last_activity',time()+$this->settings['append_time']);
             $stmt->bindValue( ':user_id',(int)$params['user']->getUserID());
             $stmt->execute();
         }
