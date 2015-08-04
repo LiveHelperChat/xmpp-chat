@@ -8,6 +8,14 @@ return array(
     'online_visitors_tracking' => true,         // Should each online visitor get it's own xmpp account?
     'xmpp_host' => '<xmpp_host>',               // E.g xmpp.livehelperchat.com
     
+    // How many seconds append to last activity. Usefull to force xmpp after last ping to be long
+    // Or if you are experience ping tracking issues, this extendes operator timeout by this value
+    'append_time' => 0,    
+    
+    // Should last activity be reset if we found that related web operator logged out
+    // But there is xmpp timeout shorter then last activity timeout?
+    'check_xmpp_activity_on_web_logout' => true,
+    
     // Debug settings
     'debug' => false,                            // Write exceptions in cache/default.log use it for debuging purposes
 

@@ -66,6 +66,11 @@ class erLhcoreClassExtensionXmppservice
             $this,
             'passiveMessage'
         ));
+        
+        $dispatcher->listen('user.after_logout', array(
+            $this,
+            'afterLogout'
+        ));
     }
 
     /**
@@ -179,6 +184,27 @@ class erLhcoreClassExtensionXmppservice
         }
     }
 
+    /**
+     * This extension can overide web account logout action
+     * 
+     * overrides default logout action and set last activity if required
+     * 
+     * @desc last activity is set if
+     * 1. Module is enabled
+     * 2. Override last activity is active
+     * 3. We have found related XMPP user and it was active in the last time() - default timeout - extended timeout
+     * */
+    public function afterLogout($params)
+    {
+        if ($this->settings['enabled'] == true && $this->settings['check_xmpp_activity_on_web_logout'] == true && erLhcoreClassModelXMPPAccount::getCount(array('filtergt' => array('lactivity' => time() - (int)erLhcoreClassModelChatConfig::fetch('sync_sound_settings')->data['online_timeout'] - (int)$this->settings['append_time']),'filter' => array('user_id' => $params['user']->getUserID())))) {
+            $db = ezcDbInstance::get();
+            $stmt = $db->prepare('UPDATE lh_userdep SET last_activity = :last_activity WHERE user_id = :user_id');
+            $stmt->bindValue( ':last_activity',time()+$xmppService->settings['append_time']);
+            $stmt->bindValue( ':user_id',(int)$params['user']->getUserID());
+            $stmt->execute();
+        }
+    }
+    
     public function getXMPPAccountByChat($chat)
     {
         $xmppAccount = false;

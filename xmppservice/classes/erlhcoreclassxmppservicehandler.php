@@ -1298,6 +1298,8 @@ class erLhcoreClassExtensionXmppserviceHandler
     {
         $params = json_decode($jsonContent, true);
         
+        $xmppService = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice');
+        
         // If ping just update last action
         if ($params['action'] == 'ping') {
             
@@ -1309,10 +1311,11 @@ class erLhcoreClassExtensionXmppserviceHandler
             
             // Updates last activity
             if (is_numeric($userId)) {
-                self::updateActivityByUserId($userId);
+                self::updateActivityByUserId($userId, time() + $xmppService->settings['append_time']);
             } else {
                 throw new Exception("Could not find LHC user by user - " . $userParts['xmppuser']);
             }
+            
         } elseif ($params['action'] == 'disconnect' || $params['action'] == 'connect') {
             
             // Fetches user id by xmpp username
@@ -1320,7 +1323,7 @@ class erLhcoreClassExtensionXmppserviceHandler
             
             // Updates last activity to zero
             if (is_numeric($userId)) {
-                self::updateActivityByUserId($userId, $params['action'] == 'connect' ? time() : 0);
+                self::updateActivityByUserId($userId, $params['action'] == 'connect' ? time() + $xmppService->settings['append_time'] : 0);
                 
                 if ($params['action'] == 'connect') {
                     
