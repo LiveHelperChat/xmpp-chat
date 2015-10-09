@@ -36,8 +36,8 @@
         </td>
         <td nowrap>
           <div class="btn-group" role="group" aria-label="..." style="width:60px;">
-            <a class="btn btn-default btn-xs icon-pencil" href="<?php echo erLhcoreClassDesign::baseurl('xmppservice/editoperator')?>/<?php echo $item->id?>" ></a>
-            <a class="btn btn-danger btn-xs icon-cancel-squared csfr-required" onclick="return confirm('<?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('kernel/messages','Are you sure?');?>')" href="<?php echo erLhcoreClassDesign::baseurl('xmppservice/deleteoperator')?>/<?php echo $item->id?>" ></a>
+            <a class="btn btn-default btn-xs" href="<?php echo erLhcoreClassDesign::baseurl('xmppservice/editoperator')?>/<?php echo $item->id?>" ><i class="material-icons mr-0">&#xE254;</i></a>
+            <a class="btn btn-danger btn-xs csfr-required" onclick="return confirm('<?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('kernel/messages','Are you sure?');?>')" href="<?php echo erLhcoreClassDesign::baseurl('xmppservice/deleteoperator')?>/<?php echo $item->id?>" ><i class="material-icons mr-0">&#xE872;</i></a>
           </div>
         </td>
     </tr>

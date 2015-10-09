@@ -12,7 +12,7 @@ class erLhcoreClassXMPPServiceAccountValidator
                     ezcInputFormDefinitionElement::OPTIONAL, 'unsafe_raw'
                 ),
                 'user_id' => new ezcInputFormDefinitionElement(
-                    ezcInputFormDefinitionElement::OPTIONAL, 'int'
+                    ezcInputFormDefinitionElement::OPTIONAL, 'int', array('min_range' => 1)
                 ),
                 'sendmessage' => new ezcInputFormDefinitionElement(
                     ezcInputFormDefinitionElement::OPTIONAL, 'boolean'
@@ -61,7 +61,7 @@ class erLhcoreClassXMPPServiceAccountValidator
             {
                 $xmppAccount->user_id = $form->user_id;
             } else {
-                $Errors[] =  erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operatorvalidator','Please enter a user id');
+                $Errors[] =  erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operatorvalidator','Please choose opeator id!');
             }
 
             if ( $form->hasValidData( 'sendmessage' ) && $form->sendmessage == true)
@@ -73,7 +73,7 @@ class erLhcoreClassXMPPServiceAccountValidator
 
             return $Errors;        
     }    
-    
+
     /**
      * At the moment it just stores an account. In the future there will be a call to create an account in xmpp server using NodeJS extension
      * @param erLhcoreClassModelXMPPAccount $xmppAccount
@@ -91,8 +91,47 @@ class erLhcoreClassXMPPServiceAccountValidator
             $xmppAccount->password = '';
         }
         
-        $xmppAccount->saveThis();        
+        $xmppAccount->saveThis();
+    }
+
+    /**
+     * Return all users ID's with assigned XMPP account, so they have to be ignored
+     * */
+    public static function getAllUsersIds($selectedUserId = 0)
+    {
+        $db = ezcDbInstance::get();
+        $stmt = $db->prepare('SELECT user_id FROM lhc_xmpp_service_account');      
+        $stmt->execute();
+        $allusersId = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $indexCurrentUser = array_search($selectedUserId, $allusersId);
+
+        if ($indexCurrentUser !== false) {
+            unset($allusersId[$indexCurrentUser]);
+        }
+
+        return $allusersId;
+    }
+
+    /**
+     * LHC Users which does not have assigned operator yet
+     * */
+    public static function getLHCUsers($params)
+    {
+        $session = erLhcoreClassUser::getSession();
+        $q = $session->createFindQuery( 'erLhcoreClassModelUser' );
+
+        // Fetch already assigned opetators
+        $usersIds = self::getAllUsersIds($params['user_id']);
+
+        if (!empty($usersIds)) {
+            $q->where(
+                $q->expr->not($q->expr->in('id', $usersIds))
+            );
+        }
+
+        $q->orderBy('id DESC');
+
+        return $session->find( $q );
     }
 }
-
-

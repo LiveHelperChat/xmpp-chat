@@ -2,14 +2,14 @@
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Username');?></label>
         
     <div class="input-group">
-        <input type="text" maxlength="250" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain_edit);?>" />
+        <input type="text" maxlength="250" autocomplete="new-password" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain_edit);?>" />
         <div class="input-group-addon"><?php if (($ahSubdomain = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain']) != '')  : ?>.<?php echo $ahSubdomain?><?php endif;?>@<?php echo erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host']?></div>
     </div>    
 </div>
 
 <div class="form-group">
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Password, enter only if you are creating new user. In most cases system does not need it.');?></label>
-    <input type="password" maxlength="250" class="form-control" name="password"  value="" />
+    <input type="password" maxlength="250" autocomplete="new-password" class="form-control" name="password"  value="" />
 </div>
 
 <div class="form-group">
@@ -28,13 +28,14 @@
 <div class="form-group">
     <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','Operator to whom belongs account')?></label>
     <?php if ($xmppaccount->type == 0) : ?>
-    <?php echo erLhcoreClassRenderHelper::renderCombobox( array (
+    <?php echo erLhcoreClassRenderHelper::renderCombobox(array(
             'input_name'     => 'user_id',
     		'optional_field' => erTranslationClassLhTranslation::getInstance()->getTranslation('chat/lists/search_panel','Select user'),
             'selected_id'    => $xmppaccount->user_id,
             'css_class'      => 'form-control',
-            'list_function'  => 'erLhcoreClassModelUser::getUserList'
-    )); ?> 
+            'list_function'  => 'erLhcoreClassXMPPServiceAccountValidator::getLHCUsers',
+            'list_function_params'  => array('user_id' => $xmppaccount->user_id),
+    )); ?>
     <?php else : ?>
     <i><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','This user type can not have assigned operator')?></i>
     <?php endif;?>
