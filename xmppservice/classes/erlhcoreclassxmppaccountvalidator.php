@@ -100,7 +100,7 @@ class erLhcoreClassXMPPServiceAccountValidator
     public static function getAllUsersIds($selectedUserId = 0)
     {
         $db = ezcDbInstance::get();
-        $stmt = $db->prepare('SELECT user_id FROM lhc_xmpp_service_account');      
+        $stmt = $db->prepare('SELECT user_id FROM lhc_xmpp_service_account WHERE type = 0');      
         $stmt->execute();
         $allusersId = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
