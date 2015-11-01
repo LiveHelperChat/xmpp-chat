@@ -33,8 +33,13 @@ $(document).ready(function () {
 			    	}, null, 'message', null, null,  null); 
 		    	}
 		    	
-		    	var presence = $pres().c("status").t(xmppservice.status).up().c('nick',{xmlns : 'http://jabber.org/protocol/nick'}).t(xmppservice.nick);
-		    	connection.send(presence);    	
+		    	var presence = $pres().c("status").t(xmppservice.status).up();
+		    	connection.send(presence); 
+		    	
+		    	setTimeout(function(){
+		    		var presence = $pres().c("status").t(xmppservice.status).up().c('nick',{xmlns : 'http://jabber.org/protocol/nick'}).t(xmppservice.nick);
+		    		connection.send(presence); 
+		    	},2000);
 		    }
 		});
 	},2000);

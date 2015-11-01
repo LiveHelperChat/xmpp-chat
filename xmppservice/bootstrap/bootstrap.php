@@ -71,6 +71,11 @@ class erLhcoreClassExtensionXmppservice
             $this,
             'afterLogout'
         ));
+        
+        $dispatcher->listen('chat.nick_changed', array(
+            $this,
+            'nickChanged'
+        ));
     }
 
     /**
@@ -346,7 +351,7 @@ class erLhcoreClassExtensionXmppservice
                         'chat' => $chat
                     ));
                 }
-                
+                                
                 // We could not determine a recipient
                 if ($xmppAccount !== false && $chat->user_id > 0) {
                     // Forward this information to NodeJS server
@@ -370,7 +375,63 @@ class erLhcoreClassExtensionXmppservice
             }
         }
     }
+    
+    /**
+     * Nick changed handling so we change nick in XMPP client.
+     * 
+     * */
+    public function nickChanged($params)
+    {
+        if ($this->settings['enabled'] == true) {
+        
+            $onlineOptions = erLhcoreClassModelChatConfig::fetch('xmppservice_options')->data;
+        
+            if (isset($onlineOptions['xmpp_enabled']) && $onlineOptions['xmpp_enabled'] == true) {
 
+                $chat = $params['chat'];
+
+                $xmppAccount = false;
+
+                if ($chat->online_user_id > 0) {
+                    $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                        'filter' => array(
+                            'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_VISITOR,
+                            'user_id' => $chat->online_user_id
+                        )
+                    ));
+                }
+        
+                if ($xmppAccount === false) {
+                    $xmppAccount = erLhcoreClassModelXMPPAccount::findOne(array(
+                        'filter' => array(
+                            'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_CHAT,
+                            'user_id' => $chat->id
+                        )
+                    ));
+                }
+        
+                if ($xmppAccount === false) {
+                    $xmppAccount = $this->registerXMPPAccountByChat(array(
+                        'chat' => $chat
+                    ));
+                }
+                
+                // Change user nick to proper one
+                $rpc = new \GameNet\Jabber\RpcClient(array(
+                    'server' => $this->settings['rpc_server'],
+                    'host' =>  $this->settings['xmpp_host'],
+                    'account_host' => $this->settings['rpc_account_host'],
+                    'username' => $this->settings['rpc_username'],
+                    'password' => $this->settings['rpc_password']
+                ));
+                
+                $paramsOnlineUser = erLhcoreClassExtensionXmppserviceHandler::getNickAndStatusByChat($chat);
+                
+                $rpc->setNick($xmppAccount->username_plain, $paramsOnlineUser['nick'], $paramsOnlineUser['status']);
+            }
+        }        
+    }
+    
     public function sendMessageToAllDepartmentOperators($params)
     {
         if ($this->settings['enabled'] == true) {
@@ -393,6 +454,21 @@ class erLhcoreClassExtensionXmppservice
                     )
                 ));
                 
+                // Change user nick to proper one
+                $rpc = new \GameNet\Jabber\RpcClient(array(
+                    'server' => $this->settings['rpc_server'],
+                    'host' =>  $this->settings['xmpp_host'],
+                    'account_host' => $this->settings['rpc_account_host'],
+                    'username' => $this->settings['rpc_username'],
+                    'password' => $this->settings['rpc_password']
+                ));
+                
+                $paramsOnlineUser = erLhcoreClassExtensionXmppserviceHandler::getNickAndStatusByChat($params['chat']);
+                
+                // Nick
+                $rpc->setNick($params['xmpp_account']->username_plain, $paramsOnlineUser['nick'], $paramsOnlineUser['status']);
+                
+                // Send messages
                 foreach ($accountsXMPP as $xmppAccountOpetrator) {
                     
                     if ($params['msg'] === false) {
