@@ -40,19 +40,29 @@ return array(
     'rpc_password' => '<your_account_password>',// E.g password
     
     'rpc_account_host' => '<rpc_account_hostname>',// E.g xmpp.example.com        
-    
+
     // Web socket address, it can be also nginx proxy
     // If you are using nginx proxy. Config line could look like 
     // 'ws://'.$_SERVER['HTTP_HOST'].'/websocket'
     // Nginx config example you can find in doc folder
     'bosh_service' => 'ws://xmpp.example.com:5280/websocket', // ws://xmpp.livehelperchat.com:5280/websocket
-    
+
     // Then operator writes a message we can track that event, should on this event message be synced from back office
     // This gives some real time UX, use it only if you are not using nodejs extensions, otherwise it's no point to have it enabled
     'use_notification' => false,
-    
+
     // Not used at the moment, but may be used in the future
-    'prebind_host' => 'http://95.85.55.134:5280/http-prebind/'
+    'prebind_host' => 'http://95.85.55.134:5280/http-prebind/',
+
+    // Should we create XMPP users when lhc user is created
+    'create_xmpp_username_by_lhc_username' => false,
+
+    // On what attribute based XMPP user should be created
+    // username or email supported
+    'type_for_xmpp_username' => 'username',
+    
+    // Should new accounts automatically receive all new chat requests
+    'xmpp_send_messages' => true
 );
 
 ?>

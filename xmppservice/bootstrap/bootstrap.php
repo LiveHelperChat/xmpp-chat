@@ -51,25 +51,30 @@ class erLhcoreClassExtensionXmppservice
             $this,
             'instanceCreated'
         ));
-        
+
         $dispatcher->listen('instance.destroyed', array(
             $this,
             'instanceDestroyed'
         ));
-        
+
         $dispatcher->listen('instance.extensions_structure', array(
             $this,
             'checkStructure'
         ));
-        
+
         $dispatcher->listen('chat.messages_added_passive', array(
             $this,
             'passiveMessage'
         ));
-        
+
         $dispatcher->listen('user.after_logout', array(
             $this,
             'afterLogout'
+        ));
+
+        $dispatcher->listen('user.user_created', array(
+            $this,
+            'userCreated'
         ));
     }
 
@@ -648,6 +653,33 @@ class erLhcoreClassExtensionXmppservice
                     ));
                 }
             }
+        }
+    }
+
+    /**
+     * Executed when new account is created.
+     * */
+    public function userCreated($params)
+    {
+        if ($this->settings['create_xmpp_username_by_lhc_username'] == true) {
+
+            $xmppAccount = new erLhcoreClassModelXMPPAccount();
+
+            // "username" or "email" supported
+            if ($this->settings['create_xmpp_username_by_lhc_username'] == 'username') {
+                $xmppAccount->username = $params['userData']->username;
+            } elseif ($this->settings['create_xmpp_username_by_lhc_username'] == 'email') {
+                list($xmppAccount->username) = explode('@', $params['userData']->email);
+            }
+
+            $xmppAccount->ctime = time();
+            $xmppAccount->password = $params['password'];
+            $xmppAccount->user_id = $params['userData']->id;
+            $xmppAccount->sendmessage = (int)$this->settings['xmpp_send_messages'];
+            $xmppAccount->saveThis();
+
+            // XMPP account
+            erLhcoreClassXMPPServiceAccountValidator::publishXMPPAccount($xmppAccount);
         }
     }
 
