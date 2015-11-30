@@ -1,4 +1,4 @@
-<h1 class="attr-header"><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/options','XMPP Options');?></h1>
+<h1 class="attr-header"><?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/options_xmpp_options.tpl.php')); ?></h1>
 
 <form action="" method="post">
 
@@ -9,7 +9,7 @@
     <?php endif; ?>
 
     <div class="form-group">
-        <label><input type="checkbox" value="on" name="XMPPEnabled" <?php isset($xmpp_options['xmpp_enabled']) && ($xmpp_options['xmpp_enabled'] == true) ? print 'checked="checked"' : ''?> /> <?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/options','XMPP Enabled');?></label><br/>
+        <label><input type="checkbox" value="on" name="XMPPEnabled" <?php isset($xmpp_options['xmpp_enabled']) && ($xmpp_options['xmpp_enabled'] == true) ? print 'checked="checked"' : ''?> /> <?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/options_xmpp_enabled.tpl.php')); ?></label><br/>
         <label><input type="checkbox" value="on" name="TrackOnline" <?php isset($xmpp_options['track_online']) && ($xmpp_options['track_online'] == true) ? print 'checked="checked"' : ''?> /> <?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/options','Track online visitors');?></label>
     </div>
     

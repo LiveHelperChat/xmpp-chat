@@ -1,0 +1,1 @@
+<?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/editoperator','Edit XMPP account');?>

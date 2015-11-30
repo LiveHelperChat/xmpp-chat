@@ -45,4 +45,6 @@ $Result['path'] = array(
     )
 );
 
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.newxmppaccount_path',array('result' => & $Result));
+
 ?>

@@ -50,4 +50,6 @@ $Result['path'] = array(
     )
 );
 
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.editoperator_path',array('result' => & $Result));
+
 ?>

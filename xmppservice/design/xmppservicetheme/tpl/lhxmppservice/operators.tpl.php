@@ -1,4 +1,4 @@
-<h1 class="attr-header"><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operators','XMPP Accounts');?></h1>
+<h1 class="attr-header"><?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/operators_xmpp_accounts.tpl.php')); ?></h1>
 
 <?php include(erLhcoreClassDesign::designtpl('lhxmppservice/search_panel.tpl.php')); ?>
 
@@ -57,4 +57,4 @@
 <p><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('chat/activechats','Empty...');?></p>
 <?php } ?>
 
-<div><a class="btn btn-default" href="<?php echo erLhcoreClassDesign::baseurl('xmppservice/newxmppaccount')?>"><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/operators','New xmpp account');?></a></div>
+<div><a class="btn btn-default" href="<?php echo erLhcoreClassDesign::baseurl('xmppservice/newxmppaccount')?>"><?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/operators_new_xmpp_account.tpl.php')); ?></a></div>

@@ -62,4 +62,6 @@ $Result['path'] = array(
     )
 );
 
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('xmppservice.options_path',array('result' => & $Result));
+
 ?>
