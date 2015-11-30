@@ -1,4 +1,4 @@
-<h1><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('department/new','New xmpp account');?></h1>
+<h1><?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/newxmppaccount_new_xmpp_account.tpl.php')); ?></h1>
 
 <?php if (isset($errors)) : ?>
 	<?php include(erLhcoreClassDesign::designtpl('lhkernel/validation_error.tpl.php'));?>

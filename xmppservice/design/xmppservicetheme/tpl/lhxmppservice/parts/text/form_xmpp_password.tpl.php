@@ -1,0 +1,1 @@
+<?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Password, enter only if you are creating new user. In most cases system does not need it.');?>

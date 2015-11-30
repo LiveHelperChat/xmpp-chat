@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Username');?></label>
+    <label><?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/form_xmpp_username.tpl.php')); ?></label>
         
     <div class="input-group">
         <input type="text" maxlength="250" autocomplete="new-password" class="form-control" name="username" <?php if ($xmppaccount->id > 0) : ?>disabled="disabled"<?php endif;?> value="<?php echo htmlspecialchars($xmppaccount->username_plain_edit);?>" />
@@ -8,7 +8,7 @@
 </div>
 
 <div class="form-group">
-    <label><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('xmppservice/form','XMPP Password, enter only if you are creating new user. In most cases system does not need it.');?></label>
+    <label><?php include(erLhcoreClassDesign::designtpl('lhxmppservice/parts/text/form_xmpp_password.tpl.php')); ?></label>
     <input type="password" maxlength="250" autocomplete="new-password" class="form-control" name="password"  value="" />
 </div>
 
