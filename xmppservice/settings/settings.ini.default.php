@@ -8,6 +8,8 @@ return array(
     'online_visitors_tracking' => true,         // Should each online visitor get it's own xmpp account?
     'xmpp_host' => '<xmpp_host>',               // E.g xmpp.livehelperchat.com
     
+    'xmpp_port' => '5222',                      // 5222 used just for representation purposes
+    
     // How many seconds append to last activity. Usefull to force xmpp after last ping to be long
     // Or if you are experience ping tracking issues, this extendes operator timeout by this value
     'append_time' => 0,    
@@ -62,7 +64,10 @@ return array(
     'type_for_xmpp_username' => 'username',
     
     // Should new accounts automatically receive all new chat requests
-    'xmpp_send_messages' => true
+    'xmpp_send_messages' => true,
+    
+    // Should we delete XMPP related account then LHC user is removed
+    'delete_xmpp_by_user_removement' => true
 );
 
 ?>

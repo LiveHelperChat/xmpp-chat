@@ -209,7 +209,27 @@ trait UserTrait
 
         $this->sendStanzaC2S($user, $stanza);
     }
-
+    
+    /**
+     * 
+     * Set user nick
+     * 
+     * @param string $user
+     * 
+     * @param string $nick
+     */
+    public function setNick($user, $nick, $status = '')
+    {
+        $stanza = "
+        <presence>
+        <status>".htmlspecialchars($status)."</status>
+        <nick xmlns='http://jabber.org/protocol/nick'>".htmlspecialchars($nick)."</nick>
+        </presence>";
+        
+        $this->sendStanzaC2S($user, $stanza);
+    }
+    
+    
     /**
      * Get information about all sessions of a user
      *
