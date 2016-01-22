@@ -51,27 +51,37 @@ class erLhcoreClassExtensionXmppservice
             $this,
             'instanceCreated'
         ));
-        
+
         $dispatcher->listen('instance.destroyed', array(
             $this,
             'instanceDestroyed'
         ));
-        
+
         $dispatcher->listen('instance.extensions_structure', array(
             $this,
             'checkStructure'
         ));
-        
+
         $dispatcher->listen('chat.messages_added_passive', array(
             $this,
             'passiveMessage'
         ));
-        
+
         $dispatcher->listen('user.after_logout', array(
             $this,
             'afterLogout'
         ));
-        
+
+        $dispatcher->listen('user.user_created', array(
+            $this,
+            'userCreated'
+        ));
+
+        $dispatcher->listen('user.deleted', array(
+            $this,
+            'userDeleted'
+        ));
+
         $dispatcher->listen('chat.nick_changed', array(
             $this,
             'nickChanged'
@@ -84,6 +94,9 @@ class erLhcoreClassExtensionXmppservice
     public function instanceCreated($params)
     {
         try {
+            // Set subdomain manual, so we avoid calling in cronjob
+            $this->instanceManual = $params['instance'];
+            
             // Just do table updates
             erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'), true));
             
@@ -95,9 +108,22 @@ class erLhcoreClassExtensionXmppservice
                 'rpc_server' => $this->settings['rpc_server'],
                 'rpc_username' => $this->settings['rpc_username'],
                 'rpc_password' => $this->settings['rpc_password'],
-                'rpc_account_host' => $this->settings['rpc_account_host']   
+                'rpc_account_host' => $this->settings['rpc_account_host']
             ));
             
+            if ($this->settings['create_xmpp_username_by_lhc_username'] == true) {
+
+                $userData = new erLhcoreClassModelUser();
+                $userData->username = $params['instance']->email;
+                $userData->email = $params['instance']->email;
+                $userData->id = 1;                            
+                
+                $this->userCreated(array(
+                    'userData' => $userData,
+                    'subdomain' => str_replace('.', '-', $params['instance']->address),
+                    'password' => $params['password']
+                ));
+            }
         } catch (Exception $e) {
             erLhcoreClassLog::write(print_r($e, true));
         }
@@ -160,6 +186,24 @@ class erLhcoreClassExtensionXmppservice
         }
     }
 
+    /**
+     * Deletes related XMPP account on user removement if enabled
+     */
+    public function userDeleted($params)
+    {
+        if ($this->settings['delete_xmpp_by_user_removement'] == true) {
+            foreach (erLhcoreClassModelXMPPAccount::getList(array(
+                'limit' => 1000000,
+                'filter' => array(
+                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR,
+                    'user_id' =>  $params['userData']->id
+                ),
+            )) as $user) {
+                $user->removeThis();
+            }
+        }
+    }
+    
     public function deleteXMPPUser($params)
     {
         erLhcoreClassExtensionXmppserviceHandler::deleteXMPPUser(array(
@@ -727,16 +771,55 @@ class erLhcoreClassExtensionXmppservice
         }
     }
 
+    /**
+     * Executed when new account is created.
+     * */
+    public function userCreated($params)
+    {
+        if ($this->settings['create_xmpp_username_by_lhc_username'] == true) {
+
+            $xmppAccount = new erLhcoreClassModelXMPPAccount();
+
+            // "username" or "email" Supported
+            if ($this->settings['create_xmpp_username_by_lhc_username'] == 'username') {
+                $xmppAccount->username = $params['userData']->username;
+            } elseif ($this->settings['create_xmpp_username_by_lhc_username'] == 'email') {
+                list($xmppAccount->username) = explode('@', $params['userData']->email);
+            }
+
+            // Clear username
+            $xmppAccount->username = preg_replace("/[^a-zA-Z0-9]/", "", $xmppAccount->username);
+
+            // Set operator username if it's empty
+            if ($xmppAccount->username == '') {
+                $xmppAccount->username = 'operator.' . $params['userData']->id;
+            }
+
+            // Format valid username
+            $subdomain = isset($params['subdomain']) ? $params['subdomain'] : erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
+            $xmppAccount->username = $xmppAccount->username . ($subdomain != '' ? '.'.$subdomain : '') . '@' . erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host'];
+
+            // Other attributes
+            $xmppAccount->ctime = time();
+            $xmppAccount->password = $params['password'];
+            $xmppAccount->user_id = $params['userData']->id;
+            $xmppAccount->sendmessage = (int)$this->settings['xmpp_send_messages'];
+            
+            // XMPP account
+            erLhcoreClassXMPPServiceAccountValidator::publishXMPPAccount($xmppAccount);
+        }
+    }
+
     public function __get($var)
     {
         switch ($var) {
-            
+                        
             case 'settings':
                 $this->settings = include ('extension/xmppservice/settings/settings.ini.php');
                 if ($this->settings['ahosting'] == true) {
-                    $this->settings['subdomain'] = str_replace('.', '-', erLhcoreClassInstance::getInstance()->address);
-                    $this->settings['enabled'] = erLhcoreClassInstance::getInstance()->full_xmpp_chat_supported == 1;
-                    $this->settings['online_visitors_tracking'] = erLhcoreClassInstance::getInstance()->full_xmpp_visitors_tracking == 1;
+                    $this->settings['subdomain'] = str_replace('.', '-',$this->instanceManual !== false ? $this->instanceManual->address :  erLhcoreClassInstance::getInstance()->address);
+                    $this->settings['enabled'] = $this->instanceManual !== false ? $this->instanceManual->full_xmpp_chat_supported == 1 : erLhcoreClassInstance::getInstance()->full_xmpp_chat_supported == 1;
+                    $this->settings['online_visitors_tracking'] = $this->instanceManual !== false ? $this->instanceManual->full_xmpp_visitors_tracking == 1 : erLhcoreClassInstance::getInstance()->full_xmpp_visitors_tracking == 1;
                 }
                 return $this->settings;
                 break;
@@ -783,6 +866,8 @@ class erLhcoreClassExtensionXmppservice
         }
     }
 
+    private $instanceManual = false;
+    
     private static $persistentSession;
 }
 

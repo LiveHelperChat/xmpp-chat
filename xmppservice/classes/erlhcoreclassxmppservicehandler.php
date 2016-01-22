@@ -684,7 +684,7 @@ class erLhcoreClassExtensionXmppserviceHandler
      * @param array $params            
      */
     public static function registerOperator($params = array())
-    {
+    {        
         try {
             if ($params['handler'] == 'rpc') {
                 
@@ -724,7 +724,7 @@ class erLhcoreClassExtensionXmppserviceHandler
         if ($subdomainUser != '') {
             $subdomainUser = '.' . $subdomainUser;
         }
-        
+               
         try {
             
             if ($params['handler'] == 'rpc') {
