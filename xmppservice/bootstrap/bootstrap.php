@@ -94,6 +94,9 @@ class erLhcoreClassExtensionXmppservice
     public function instanceCreated($params)
     {
         try {
+            // Set subdomain manual, so we avoid calling in cronjob
+            $this->instanceManual = $params['instance'];
+            
             // Just do table updates
             erLhcoreClassUpdate::doTablesUpdate(json_decode(file_get_contents('extension/xmppservice/doc/structure.json'), true));
             
@@ -108,6 +111,19 @@ class erLhcoreClassExtensionXmppservice
                 'rpc_account_host' => $this->settings['rpc_account_host']
             ));
             
+            if ($this->settings['create_xmpp_username_by_lhc_username'] == true) {
+
+                $userData = new erLhcoreClassModelUser();
+                $userData->username = $params['instance']->email;
+                $userData->email = $params['instance']->email;
+                $userData->id = 1;                            
+                
+                $this->userCreated(array(
+                    'userData' => $userData,
+                    'subdomain' => str_replace('.', '-', $params['instance']->address),
+                    'password' => $params['password']
+                ));
+            }
         } catch (Exception $e) {
             erLhcoreClassLog::write(print_r($e, true));
         }
@@ -780,7 +796,7 @@ class erLhcoreClassExtensionXmppservice
             }
 
             // Format valid username
-            $subdomain = erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
+            $subdomain = isset($params['subdomain']) ? $params['subdomain'] : erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['subdomain'];
             $xmppAccount->username = $xmppAccount->username . ($subdomain != '' ? '.'.$subdomain : '') . '@' . erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['xmpp_host'];
 
             // Other attributes
@@ -797,13 +813,13 @@ class erLhcoreClassExtensionXmppservice
     public function __get($var)
     {
         switch ($var) {
-            
+                        
             case 'settings':
                 $this->settings = include ('extension/xmppservice/settings/settings.ini.php');
                 if ($this->settings['ahosting'] == true) {
-                    $this->settings['subdomain'] = str_replace('.', '-', erLhcoreClassInstance::getInstance()->address);
-                    $this->settings['enabled'] = erLhcoreClassInstance::getInstance()->full_xmpp_chat_supported == 1;
-                    $this->settings['online_visitors_tracking'] = erLhcoreClassInstance::getInstance()->full_xmpp_visitors_tracking == 1;
+                    $this->settings['subdomain'] = str_replace('.', '-',$this->instanceManual !== false ? $this->instanceManual->address :  erLhcoreClassInstance::getInstance()->address);
+                    $this->settings['enabled'] = $this->instanceManual !== false ? $this->instanceManual->full_xmpp_chat_supported == 1 : erLhcoreClassInstance::getInstance()->full_xmpp_chat_supported == 1;
+                    $this->settings['online_visitors_tracking'] = $this->instanceManual !== false ? $this->instanceManual->full_xmpp_visitors_tracking == 1 : erLhcoreClassInstance::getInstance()->full_xmpp_visitors_tracking == 1;
                 }
                 return $this->settings;
                 break;
@@ -850,6 +866,8 @@ class erLhcoreClassExtensionXmppservice
         }
     }
 
+    private $instanceManual = false;
+    
     private static $persistentSession;
 }
 
