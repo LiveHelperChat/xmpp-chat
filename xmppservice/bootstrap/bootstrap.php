@@ -781,9 +781,9 @@ class erLhcoreClassExtensionXmppservice
             $xmppAccount = new erLhcoreClassModelXMPPAccount();
 
             // "username" or "email" Supported
-            if ($this->settings['create_xmpp_username_by_lhc_username'] == 'username') {
+            if ($this->settings['type_for_xmpp_username'] == 'username') {
                 $xmppAccount->username = $params['userData']->username;
-            } elseif ($this->settings['create_xmpp_username_by_lhc_username'] == 'email') {
+            } elseif ($this->settings['type_for_xmpp_username'] == 'email') {
                 list($xmppAccount->username) = explode('@', $params['userData']->email);
             }
 
