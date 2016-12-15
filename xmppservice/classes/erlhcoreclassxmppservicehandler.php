@@ -1091,8 +1091,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 $statusCommand = erLhcoreClassChatCommand::processCommand(array(
                     'no_ui_update' => true,
                     'msg' => $body,
-                    'chat' => & $chat
+                    'chat' => & $chat,
+                    'user' => $user
                 ));
+                
                 if ($statusCommand['processed'] === true) {
                     $messageUserId = - 1; // Message was processed set as internal message
                     $body = '[b]' . $userData->name_support . '[/b]: ' . $body . ' ' . ($statusCommand['process_status'] != '' ? '|| ' . $statusCommand['process_status'] : '');
