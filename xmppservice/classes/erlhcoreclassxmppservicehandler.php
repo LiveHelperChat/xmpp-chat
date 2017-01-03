@@ -1097,7 +1097,10 @@ class erLhcoreClassExtensionXmppserviceHandler
                 
                 if ($statusCommand['processed'] === true) {
                     $messageUserId = - 1; // Message was processed set as internal message
-                    $body = '[b]' . $userData->name_support . '[/b]: ' . $body . ' ' . ($statusCommand['process_status'] != '' ? '|| ' . $statusCommand['process_status'] : '');
+                    
+                    $rawMessage = !isset($statusCommand['raw_message']) ? $body : $statusCommand['raw_message'];
+                    
+                    $body = '[b]' . $userData->name_support . '[/b]: ' . $rawMessage . ' ' . ($statusCommand['process_status'] != '' ? '|| ' . $statusCommand['process_status'] : '');
                 }
                 
                 if (isset($statusCommand['ignore']) && $statusCommand['ignore'] == true) {
