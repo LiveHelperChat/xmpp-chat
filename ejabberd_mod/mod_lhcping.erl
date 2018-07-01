@@ -31,18 +31,15 @@
 
 -module(mod_lhcping).
 
--author('bjc@kublai.com').
+-behaviour(gen_mod).
 
--behavior(gen_mod).
+-behaviour(gen_server).
 
--behavior(gen_server).
-
--include("ejabberd.hrl").
 -include("logger.hrl").
 
--include("jlib.hrl").
+-include("xmpp.hrl").
 
--define(SUPERVISOR, ejabberd_sup).
+-define(SUPERVISOR, ejabberd_gen_mod_sup).
 
 -define(DEFAULT_SEND_PINGS, false).
 
@@ -54,36 +51,38 @@
 -export([start_link/2, start_ping/2, stop_ping/2]).
 
 %% gen_mod callbacks
--export([start/2, stop/1]).
+-export([start/2, stop/1,depends/2]).
 
 %% gen_server callbacks
 -export([init/1, terminate/2, handle_call/3,
 	 handle_cast/2, handle_info/2, code_change/3]).
 
 %% Hook callbacks
--export([iq_ping/3, user_online/3, user_offline/3,
-	 user_send/4, mod_opt_type/1]).
+-export([iq_ping/1, user_online/3, user_offline/3,
+	 user_send/1, mod_opt_type/1]).
 
 -record(state,
 	{host = <<"">>,
-         send_pings = ?DEFAULT_SEND_PINGS :: boolean(),
+     send_pings = ?DEFAULT_SEND_PINGS :: boolean(),
 	 ping_interval = ?DEFAULT_PING_INTERVAL :: non_neg_integer(),
 	 timeout_action = none :: none | kill,
 	 ping_address,
 	 ahenviroment,
 	 basedomain,
 	 ahprotocol,
-         timers = (?DICT):new() :: ?TDICT}).
+     timers = (?DICT):new() :: dict:dict()}).
 
 %%====================================================================
 %% API
 %%====================================================================
 start_link(Host, Opts) ->
+    ?INFO_MSG("start_link, LHC Ping", []),
     Proc = gen_mod:get_module_proc(Host, ?MODULE),
     gen_server:start_link({local, Proc}, ?MODULE,
 			  [Host, Opts], []).
 
 start_ping(Host, JID) ->
+    ?INFO_MSG("start_ping, LHC Ping", []),
     Proc = gen_mod:get_module_proc(Host, ?MODULE),
     gen_server:cast(Proc, {start_ping, JID}).
 
@@ -95,20 +94,27 @@ stop_ping(Host, JID) ->
 %% gen_mod callbacks
 %%====================================================================
 start(Host, Opts) ->
+    ?INFO_MSG("start, LHC Ping", []),
     Proc = gen_mod:get_module_proc(Host, ?MODULE),
+    ?INFO_MSG("start, Got Proc", []),
     PingSpec = {Proc, {?MODULE, start_link, [Host, Opts]},
-		transient, 2000, worker, [?MODULE]},
-    supervisor:start_child(?SUPERVISOR, PingSpec).
+        transient, 2000, worker, [?MODULE]},
+    ?INFO_MSG("start, Got Ping Spec", []),       
+    supervisor:start_child(?SUPERVISOR, PingSpec),
+    ?INFO_MSG("start, Got SUPERVISOR", []).
 
 stop(Host) ->
     Proc = gen_mod:get_module_proc(Host, ?MODULE),
     gen_server:call(Proc, stop),
     supervisor:delete_child(?SUPERVISOR, Proc).
-
+    
+depends(_Host, _Opts) ->
+            [].
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
 init([Host, Opts]) ->
+    ?INFO_MSG("start, init", []),
     SendPings = gen_mod:get_opt(send_pings, Opts,
                                 fun(B) when is_boolean(B) -> B end,
 				?DEFAULT_SEND_PINGS),
@@ -134,7 +140,7 @@ init([Host, Opts]) ->
 				false),
     IQDisc = gen_mod:get_opt(iqdisc, Opts, fun gen_iq_handler:check_type/1,
                              no_queue),
-    mod_disco:register_feature(Host, ?NS_PING),
+    %%mod_disco:register_feature(Host, ?NS_PING),
     gen_iq_handler:add_iq_handler(ejabberd_sm, Host,
 				  ?NS_PING, ?MODULE, iq_ping, IQDisc),
     gen_iq_handler:add_iq_handler(ejabberd_local, Host,
@@ -169,8 +175,8 @@ terminate(_Reason, #state{host = Host}) ->
     gen_iq_handler:remove_iq_handler(ejabberd_local, Host,
 				     ?NS_PING),
     gen_iq_handler:remove_iq_handler(ejabberd_sm, Host,
-				     ?NS_PING),
-    mod_disco:unregister_feature(Host, ?NS_PING).
+				     ?NS_PING).
+  %%  mod_disco:unregister_feature(Host, ?NS_PING).
 
 handle_call(stop, _From, State) ->
     {stop, normal, ok, State};
@@ -204,14 +210,15 @@ handle_cast({iq_pong, JID, timeout}, State) ->
 handle_cast(_Msg, State) -> {noreply, State}.
 
 handle_info({timeout, _TRef, {ping, JID}}, State) ->
-    IQ = #iq{type = get,
-	     sub_el =
-		 [#xmlel{name = <<"ping">>,
-			 attrs = [{<<"xmlns">>, ?NS_PING}], children = []}]},
-    Pid = self(),
-    F = fun (Response) ->
-		gen_server:cast(Pid, {iq_pong, JID, Response})
-	end,
+%%    IQ = #iq{type = get,
+%%     sub_els =
+%%		 [#xmlel{name = <<"ping">>,
+%%			 attrs = [{<<"xmlns">>, ?NS_PING}], children = []}]},
+    Host = State#state.host,
+%%    Pid = self(),
+%%    F = fun (Response) ->
+%%		gen_server:cast(Pid, {iq_pong, JID, Response})
+%%	end,
 	
 	%% @todo by jid determine instance address for automated hosting support		
 	Method = post,  
@@ -227,11 +234,13 @@ handle_info({timeout, _TRef, {ping, JID}}, State) ->
 	       httpc:request(Method, {erlang:binary_to_list(State#state.ahprotocol)++ re:replace(lists:last(string:tokens(UserJID,".")),"-",".",[{return,list}]) ++ "." ++ erlang:binary_to_list(State#state.basedomain) ++ "/xmppservice/operatorstatus", Header, Type, Body}, HTTPOptions, Options);       
 	       %% ?INFO_MSG("Automated hosting enviroment",[Subdomain]);
 	    false -> 
-	    httpc:request(Method, {erlang:binary_to_list(State#state.ping_address), Header, Type, Body}, HTTPOptions, Options)
+	    httpc:request(Method, {State#state.ping_address, Header, Type, Body}, HTTPOptions, Options)
 	end,
      		
     From = jlib:make_jid(<<"">>, State#state.host, <<"">>),
-    ejabberd_local:route_iq(From, JID, IQ, F),
+    IQ = #iq{from = From, to = JID, type = get, sub_els = [#ping{}]},
+
+    ejabberd_router:route_iq(IQ, JID, gen_mod:get_module_proc(Host, ?MODULE), State#state.ping_interval),
     Timers = add_timer(JID, State#state.ping_interval,
 		       State#state.timers),
     {noreply, State#state{timers = Timers}};
@@ -242,14 +251,14 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 %%====================================================================
 %% Hook callbacks
 %%====================================================================
-iq_ping(_From, _To,
-	#iq{type = Type, sub_el = SubEl} = IQ) ->
+iq_ping(#iq{type = Type, sub_els = SubEl} = IQ) ->
+
     case {Type, SubEl} of
       {get, #xmlel{name = <<"ping">>}} ->
-	  IQ#iq{type = result, sub_el = []};
+	  IQ#iq{type = result, sub_els = []};
       _ ->
 	  IQ#iq{type = error,
-		sub_el = [SubEl, ?ERR_FEATURE_NOT_IMPLEMENTED]}
+		sub_els = [SubEl, xmpp:err_feature_not_implemented()]}
     end.
 
 %% Activate pinging only to operators
@@ -263,12 +272,14 @@ user_offline(_SID, JID, _Info) ->
     stop_ping(JID#jid.lserver, JID).
 
 %% Activate pinging only to operators
-user_send(Packet, _C2SState, JID, _From) ->
-	case re:run(jlib:jid_to_string(JID),"^visitor\.[0-9](.*?)") of
+user_send({Packet, C2SState}) ->
+    From = xmpp:get_from(Packet),
+%%    To = xmpp:get_to(Packet),	
+    case re:run(jlib:jid_to_string(From),"^visitor\.[0-9](.*?)") of
 	  {match, _} ->  ok;
-	  nomatch -> start_ping(JID#jid.lserver, JID)
+	  nomatch -> start_ping(From#jid.lserver, From)
 	end,
-	Packet.
+	{Packet, C2SState}.
 
 %%====================================================================
 %% Internal functions
@@ -308,5 +319,19 @@ mod_opt_type(timeout_action) ->
     fun (none) -> none;
 	(kill) -> kill
     end;
+mod_opt_type(ping_address) ->
+    fun(Val) when is_binary(Val) -> binary_to_list(Val);
+    (Val) -> Val
+    end;
+mod_opt_type(ahenviroment) ->
+    fun (B) when is_boolean(B) -> B end;
+mod_opt_type(basedomain) ->
+    fun(Val) when is_binary(Val) -> binary_to_list(Val);
+    (Val) -> Val
+    end;
+mod_opt_type(ahprotocol) ->
+    fun(Val) when is_binary(Val) -> binary_to_list(Val);
+    (Val) -> Val
+    end;           
 mod_opt_type(_) ->
-    [iqdisc, ping_interval, send_pings, timeout_action].
+    [iqdisc, ping_interval, send_pings, timeout_action, ping_address, ahenviroment, basedomain, ahprotocol].
