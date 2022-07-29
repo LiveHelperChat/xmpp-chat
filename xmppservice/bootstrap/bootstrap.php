@@ -86,6 +86,22 @@ class erLhcoreClassExtensionXmppservice
             $this,
             'nickChanged'
         ));
+        $dispatcher->listen('group_chat.web_add_msg_admin', array(
+            $this,
+            'groupChatMsg'
+        ));
+        $dispatcher->listen('group_chat.new_group_chat_room', array(
+            $this,
+            'newGroupChatRoom'
+        ));
+        $dispatcher->listen('group_chat.remove_group_chat', array(
+            $this,
+            'removeGroupChat'
+        ));
+        $dispatcher->listen('group_chat.new_group_chat_member', array(
+            $this,
+            'newGroupChatMember'
+        ));
     }
 
     /**
@@ -476,6 +492,146 @@ class erLhcoreClassExtensionXmppservice
         }        
     }
     
+    /**
+     * New Operator Group Chat created
+     *
+     * */
+    public function newGroupChatRoom($params)
+    {
+        if ($this->settings['enabled'] == true) {
+            $chat = $params['chat'];
+            if ($chat !== false) {
+                $host = $this->settings['xmpp_host'];
+                $room = strtolower($chat->name);
+                $userData = erLhcoreClassModelUser::fetch($chat->user_id);
+                if ($this->roomExists($room) == false) {
+                    // Create new MUC room
+                    $rpc = new \GameNet\Jabber\RpcClient(array(
+                        'server' => $this->settings['rpc_server'],
+                        'host' =>  $this->settings['xmpp_host'],
+                        'account_host' => $this->settings['rpc_account_host'],
+                        'username' => $this->settings['rpc_username'],
+                        'password' => $this->settings['rpc_password']
+                    ));
+                    $rpc->createRoom($room);
+                }
+                $rpc = new \GameNet\Jabber\RpcClient(array(
+                    'server' => $this->settings['rpc_server'],
+                    'host' =>  $this->settings['xmpp_host'],
+                    'account_host' => $this->settings['rpc_account_host'],
+                    'username' => $this->settings['rpc_username'],
+                    'password' => $this->settings['rpc_password']
+                ));
+                $rpc->setRoomOption($room, "allow_subscription", "true"); 
+            }
+        }
+    }
+
+    public function newGroupChatMember($params) {
+        if ($this->settings['enabled'] == true) {
+            $member = $params['member'];
+            $chat = erLhcoreClassModelGroupChat::findOne(array('filter' => array('id' => $member->group_id)));
+            if ($chat !== false) {
+                $room = strtolower($chat->name);
+                $userData = erLhcoreClassModelUser::fetch($member->user_id);
+                $userName = strtolower($userData->name . '.' . $userData->surname . '.operator');
+                $host = $this->settings['xmpp_host'];
+
+                $xmppOperator = erLhcoreClassModelXMPPAccount::findOne(array(
+                    'filter' => array(
+                        'user_id' => $member->user_id,
+                        'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR
+                    )
+                ));
+
+                // If there is NOT an XMPP account then just subscribe else invite and subscribe
+                if ($xmppOperator === false) {
+                    $rpc = new \GameNet\Jabber\RpcClient(array(
+                        'server' => $this->settings['rpc_server'],
+                        'host' =>  $host,
+                        'account_host' => $this->settings['rpc_account_host'],
+                        'username' => $this->settings['rpc_username'],
+                        'password' => $this->settings['rpc_password']
+                    ));
+                    $rpc->subscribeToRoom($userName . '@' . $host, $userName, $room);
+                } else {
+                    $rpc = new \GameNet\Jabber\RpcClient(array(
+                        'server' => $this->settings['rpc_server'],
+                        'host' =>  $this->settings['xmpp_host'],
+                        'account_host' => $this->settings['rpc_account_host'],
+                        'username' => $this->settings['rpc_username'],
+                        'password' => $this->settings['rpc_password']
+                    ));
+                    $rpc->inviteToRoom($room, "", "invite for private chat", array($xmppOperator->username));
+
+                    $rpc = new \GameNet\Jabber\RpcClient(array(
+                        'server' => $this->settings['rpc_server'],
+                        'host' =>  $host,
+                        'account_host' => $this->settings['rpc_account_host'],
+                        'username' => $this->settings['rpc_username'],
+                        'password' => $this->settings['rpc_password']
+                    ));
+                    $rpc->subscribeToRoom($xmppOperator->username, $userName, $room);
+                }
+            }
+        }
+    }
+
+    public function removeGroupChat($params)
+    {
+        if ($this->settings['enabled'] == true) {
+            $chat = $params['chat'];
+            if ($chat !== false) {
+                $room = strtolower($chat->name);
+                if ($this->roomExists($room) == true) {
+                    // Destroy the MUC room
+                    $rpc = new \GameNet\Jabber\RpcClient(array(
+                        'server' => $this->settings['rpc_server'],
+                        'host' =>  $this->settings['xmpp_host'],
+                        'account_host' => $this->settings['rpc_account_host'],
+                        'username' => $this->settings['rpc_username'],
+                        'password' => $this->settings['rpc_password']
+                    ));
+                    $rpc->deleteRoom($room);
+                }
+            }
+        }
+    }
+
+    public function roomExists($room) {
+        $rpc = new \GameNet\Jabber\RpcClient(array(
+            'server' => $this->settings['rpc_server'],
+            'host' =>  $this->settings['xmpp_host'],
+            'account_host' => $this->settings['rpc_account_host'],
+            'username' => $this->settings['rpc_username'],
+            'password' => $this->settings['rpc_password']
+        ));
+        $rooms = $rpc->getOnlineRooms();
+        if (in_array($room . '@conference.' . $this->settings['xmpp_host'], $rooms)) {
+            return true;
+        } else {
+            return false;
+        } 
+    }
+
+    public function groupChatMsg($params) {
+        if ($this->settings['enabled'] == true) {
+            $msg = $params['msg'];
+            $chat = $params['chat'];
+            $room = strtolower($chat->name) . '@conference.' . $this->settings['xmpp_host'];
+            $sender = str_replace(' ', '.', $msg->name_support . '.operator@' .  $this->settings['xmpp_host']);
+            $rpc = new \GameNet\Jabber\RpcClient(array(
+                'server' => $this->settings['rpc_server'],
+                'host' =>  $this->settings['xmpp_host'],
+                'account_host' => $this->settings['rpc_account_host'],
+                'username' => $this->settings['rpc_username'],
+                'password' => $this->settings['rpc_password']
+            ));
+            $rpc->sendMessageChat($sender, $room, $msg->msg, "", 'groupchat');
+        }
+
+    }
+
     public function sendMessageToAllDepartmentOperators($params)
     {
         if ($this->settings['enabled'] == true) {
@@ -870,5 +1026,3 @@ class erLhcoreClassExtensionXmppservice
     
     private static $persistentSession;
 }
-
-

@@ -55,7 +55,7 @@ trait RoomTrait
             array(
                 'name'    => $name,
                 'service' => 'conference.' . $this->host,
-                'host'    => $this->host,
+                'host'    => $this->host
             )
         );
     }
@@ -75,10 +75,11 @@ trait RoomTrait
         $this->sendRequest(
             'send_direct_invitation',
             array(
-                'room'     => $name . '@conference.' . $this->host,
+                'name'     => $name,
+                'service'  => 'conference.' . $this->host,
                 'password' => $password,
                 'reason'   => $reason,
-                'users'    => join(':', $users),
+                'users'    => join(':', $users)
             )
         );
     }
@@ -94,12 +95,30 @@ trait RoomTrait
             'destroy_room',
             array(
                 'name'    => $name,
-                'service' => 'conference.' . $this->host,
-                'host'    => $this->host,
+                'service' => 'conference.' . $this->host
             )
         );
     }
 
+    /**
+     * Subscribe to Room so we can send msgs to the MUC
+     *
+     * @param string $user. JID of the Operator
+     * @param string $nick, User nickname
+     * @param string $room
+     */
+    public function subscribeToRoom($user, $nick, $room)
+    {
+        $this->sendRequest(
+            'subscribe_room',
+            array(
+                'user'     => $user,
+                'nick'     => $nick,
+                'room'     => $room . '@conference.' . $this->host,
+                'nodes'    => ''
+            )
+        );
+    }
     /**
      * List existing rooms.
      *
@@ -109,7 +128,7 @@ trait RoomTrait
     {
         $rooms = $this->sendRequest(
             'muc_online_rooms',
-             array('host' => $this->host)
+             array('host' => 'conference.' . $this->host)
         );
 
         if (!isset($rooms['rooms']) || empty($rooms['rooms'])) {

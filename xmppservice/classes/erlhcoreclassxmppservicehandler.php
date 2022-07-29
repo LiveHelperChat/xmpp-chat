@@ -215,11 +215,9 @@ class erLhcoreClassExtensionXmppserviceHandler
                 }
             }
         } catch (Exception $e) {
-            
             if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
                 erLhcoreClassLog::write(print_r($e, true));
             }
-            
             throw new Exception('Could not delete user from roaster!');
         }
         
@@ -1228,8 +1226,26 @@ class erLhcoreClassExtensionXmppserviceHandler
     public static function handleMessageFromOperator($params)
     {
         try {
+            if ($params['type'] == 'chat') {
+                self::handleChatFromOperator($params);
+            } else if ($params['type'] == 'groupchat') {
+                self::handleGroupChatFromOperator($params);
+            } else if ($params['type'] == 'presence') {
+                self::handlePresenceFromOperator($params);
+            }
+        } catch (Exception $e) {
+            if (erLhcoreClassModule::getExtensionInstance('erLhcoreClassExtensionXmppservice')->settings['debug'] == true) {
+                erLhcoreClassLog::write(print_r($e, true));
+            }
+            throw $e;
+        }
+    }
+
+    public static function handleChatFromOperator($params)
+    {
+        try {
             $parts = explode('.', $params['receiver']);
-            
+             
             if (isset($parts[1])) {
                 
                 $xmppUserLogin = $params['sender'] . '@' . $params['server'];
@@ -1291,6 +1307,80 @@ class erLhcoreClassExtensionXmppserviceHandler
             throw $e;
         }
     }
+
+    public static function handleGroupChatFromOperator($params)
+    {
+        try {
+            $room =  strtoupper($params['receiver']);
+            $sender = $params['sender'] . '@' . $params['server'];
+            $groupChat = erLhcoreClassModelGroupChat::findOne(array(
+                'filter' => array(
+                    'name' => $room
+                )
+            ));
+            if (!isset($params['body']) || trim($params['body']) == '') {
+                throw new Exception('Not a valid message!');
+            }
+            $xmppAccountOperator = erLhcoreClassModelXMPPAccount::findOne(array(
+                'filter' => array(
+                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR,
+                    'username' => $sender
+                )
+            ));
+            $userData = erLhcoreClassModelUser::fetch($xmppAccountOperator->user_id);
+
+            $msg = new erLhcoreClassModelGroupMsg();
+            $msg->time = time();
+            $msg->user_id = $xmppAccountOperator->user_id;
+            $msg->msg = trim($params['body']);
+            $msg->chat_id = $groupChat->id;
+            $msg->name_support = $userData->name_official;
+            $msg->saveThis();
+
+            $options[] = 'status';
+            $groupChat->last_msg_op_id = $xmppAccountOperator->user_id;
+            $groupChat->last_msg = mb_substr($msg->msg,0,200);
+            $groupChat->last_user_msg_time = time();
+            $groupChat->last_msg_id = $msg->id;
+            $groupChat->updateThis(array('update' => array('last_msg_op_id','last_msg','last_user_msg_time','last_msg_id')));
+
+        } catch (Exception $e) {
+            erLhcoreClassLog::write(print_r($e, true));
+            throw $e;
+        }
+    }
+
+    public static function handlePresenceFromOperator($params)
+    {
+        try {
+            $room =  strtoupper($params['receiver']);
+            $sender = $params['sender'] . '@' . $params['server'];
+            $groupChat = erLhcoreClassModelGroupChat::findOne(array(
+                'filter' => array(
+                    'name' => $room
+                )
+            ));
+            $xmppAccountOperator = erLhcoreClassModelXMPPAccount::findOne(array(
+                'filter' => array(
+                    'type' => erLhcoreClassModelXMPPAccount::USER_TYPE_OPERATOR,
+                    'username' => $sender
+                )
+            ));
+            $member = erLhcoreClassModelGroupChatMember::findOne(array('filter' => array('group_id' => $groupChat->id, 'user_id' => $xmppAccountOperator->user_id)));
+            if ($member instanceof erLhcoreClassModelGroupChatMember) {
+                if ($params['status'] == 'available') {
+                    $member->jtime = time();
+                    $member->saveThis();
+                } else if ($params['status'] == 'unavailable') {
+                    $member->removeThis();
+                }
+            }
+        } catch (Exception $e) {
+            erLhcoreClassLog::write(print_r($e, true));
+            throw $e;
+        }
+    }
+
 
     /**
      * Handlers requests like
